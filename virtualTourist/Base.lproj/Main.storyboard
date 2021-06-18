@@ -54,28 +54,29 @@
                     <navigationItem key="navigationItem" id="Yw1-sA-0d0"/>
                     <connections>
                         <outlet property="MapView" destination="RyI-Wv-EvY" id="pfy-sq-L4p"/>
+                        <segue destination="4ZU-NZ-Kje" kind="show" identifier="photoAlbumViewController" id="FvF-uH-K6m"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="463" y="43"/>
         </scene>
-        <!--View Controller-->
+        <!--Photo Album View Controller-->
         <scene sceneID="eDo-xc-vXw">
             <objects>
-                <viewController id="4ZU-NZ-Kje" sceneMemberID="viewController">
+                <viewController id="4ZU-NZ-Kje" customClass="PhotoAlbumViewController" customModule="virtualTourist" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="JJF-Ku-Cgj">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="EXR-dB-NCe">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <rect key="frame" x="0.0" y="44" width="375" height="623"/>
                                 <subviews>
                                     <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="toC-0N-cD3">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="200"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="187"/>
                                     </mapView>
                                     <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="V6f-QN-Ns8">
-                                        <rect key="frame" x="0.0" y="200" width="375" height="400.5"/>
+                                        <rect key="frame" x="0.0" y="187" width="375" height="373.5"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="T2s-dx-ayA">
                                             <size key="itemSize" width="128" height="128"/>
@@ -95,7 +96,7 @@
                                         </cells>
                                     </collectionView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="J4W-uD-23j">
-                                        <rect key="frame" x="0.0" y="600.5" width="375" height="66.5"/>
+                                        <rect key="frame" x="0.0" y="560.5" width="375" height="62.5"/>
                                         <color key="backgroundColor" systemColor="systemGray6Color"/>
                                         <state key="normal" title="New Collection "/>
                                     </button>

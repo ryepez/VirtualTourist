@@ -15,15 +15,45 @@ class TraveLocationMapController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        //setting the map delegate
+        mapView.delegate = self
+
         //hidding the navigation controller
         navigationController?.setNavigationBarHidden(true, animated: false)
         
-        mapView.delegate = self
+        
+        //load last position of last map looked at
         setupLastMapLocation()
+        
+        //creating the gesture hold and press
+        let dropPin = UILongPressGestureRecognizer(target: self, action: #selector(holdToDrop))
+         mapView.addGestureRecognizer(dropPin)
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        //hidding the navigation controller
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+    
+    func addAnnotation(location: CLLocationCoordinate2D){
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = location
+            annotation.title = "Some Title"
+            self.mapView.addAnnotation(annotation)
+    }
+    @objc func holdToDrop(sender: UIGestureRecognizer){
+        if sender.state == .ended {
+            let locationInView = sender.location(in: mapView)
+            let locationOnMap = mapView.convert(locationInView, toCoordinateFrom: mapView)
+            
+            addAnnotation(location: locationOnMap)
+        }
+        
         
     }
 
-    //helper method to load the user last map that he was looking at
+    //helper method to load the user last map that user was looking at
     fileprivate func setupLastMapLocation() {
         let isSliderSet = UserDefaults.standard.bool(forKey: "lastMapLocation")
         
@@ -37,6 +67,36 @@ class TraveLocationMapController: UIViewController {
             
         } else {
             UserDefaults.standard.set(true, forKey: "lastMapLocation")
+        }
+    }
+    
+    // this method controls the look of the pins and displays the data in a better format
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        
+        let reuseId = "pin"
+        
+        var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
+        
+        if pinView == nil {
+            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
+            pinView!.canShowCallout = true
+            pinView!.pinTintColor = .red
+            pinView!.animatesDrop = true
+            pinView!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
+        }
+        else {
+            pinView!.annotation = annotation
+        }
+        
+        return pinView
+    }
+    
+    // Method does the segue when user taps the pin
+    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        if control == view.rightCalloutAccessoryView {
+         
+            performSegue(withIdentifier: "photoAlbumViewController", sender: self)
+
         }
     }
   
