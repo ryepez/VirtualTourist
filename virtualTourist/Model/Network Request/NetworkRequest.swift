@@ -1,0 +1,107 @@
+//
+//  NetworkRequest.swift
+//  virtualTourist
+//
+//  Created by Ramon Yepez on 6/18/21.
+//
+
+import Foundation
+import UIKit
+
+class NetworkRequests {
+    
+    struct Auth {
+        static var apiKey = "49486a458e82e1d5f7b2b1c95b324cff"
+    }
+    
+    enum Endpoints {
+        static let base = "https://www.flickr.com/services/rest/?method="
+        
+        
+        
+        case getPictureOneMileRadius(String, String)
+    
+        
+        var stringValue: String {
+            switch self {
+            
+            case .getPictureOneMileRadius(let lat, let lon):
+                return Endpoints.base + "flickr.photos.search&api_key=\(Auth.apiKey)&lat=\(lat)&lon=\(lon)&radius=1&radius_units=mi&per_page=20&page=1&format=json&nojsoncallback=1&extras=url_q"
+                
+            }
+            
+        }
+        var url: URL {
+            return URL(string: stringValue)!
+        }
+    }
+    
+    class func taskForGETRequest<ResponseType: Decodable>(url: URL, responseType: ResponseType.Type, completion: @escaping (ResponseType?, Error?) -> Void) {
+        
+        let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    completion(nil, error)
+                }
+                return
+            }
+
+            let decoder = JSONDecoder()
+            do {
+                let responseObject = try decoder.decode(ResponseType.self, from: data)
+                DispatchQueue.main.async {
+                    completion(responseObject, nil)
+                }
+            } catch {
+                do {
+                    let errorResponse = try decoder.decode(ErrorResponse.self, from: data)
+                    
+                    DispatchQueue.main.async {
+                        completion(nil,errorResponse)
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        completion(nil, error)
+                    }
+                }
+                
+            }
+            
+        }
+        task.resume()
+    }
+    
+    
+    class func getFotoLocation(url: URL, completion: @escaping ([OnePhoto], Error?) -> Void){
+        
+        taskForGETRequest(url: url, responseType: Photos.self) { (response, error) in
+            
+            if let response = response {
+                completion(response.photos.photo, nil)
+            } else {
+                completion([], nil)
+            }
+        }
+    }
+    
+    class func imageRequest(url: URL, completionHandler: @escaping (UIImage?, Error?) -> Void){
+        let task = URLSession.shared.downloadTask(with: url) {(location, response, error) in
+            guard let location = location else {
+                completionHandler(nil, error)
+                return
+            }
+        
+                
+            let imageData = try! Data(contentsOf: location)
+            let image = UIImage(data: imageData)
+            completionHandler(image, nil)
+        
+        }
+        task.resume()
+    
+    
+}
+    
+    
+}
+

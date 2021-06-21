@@ -8,16 +8,25 @@
 
 /* Begin PBXBuildFile section */
 		F666E1CF267D42B700F89A4F /* PhotoAlbumViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F666E1CE267D42B700F89A4F /* PhotoAlbumViewController.swift */; };
+		F666E1D3267DB1F800F89A4F /* NetworkRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F666E1D2267DB1F800F89A4F /* NetworkRequest.swift */; };
+		F666E1D8267E613400F89A4F /* ErrorResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = F666E1D7267E613400F89A4F /* ErrorResponse.swift */; };
+		F666E1DB267E68FF00F89A4F /* fotoResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = F666E1DA267E68FF00F89A4F /* fotoResponse.swift */; };
+		F666E1DF267E7B4C00F89A4F /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F666E1DE267E7B4C00F89A4F /* DataModel.swift */; };
 		F6870A10267AAB050066D00B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6870A0F267AAB050066D00B /* AppDelegate.swift */; };
 		F6870A12267AAB050066D00B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6870A11267AAB050066D00B /* SceneDelegate.swift */; };
 		F6870A14267AAB050066D00B /* TraveLocationMapController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6870A13267AAB050066D00B /* TraveLocationMapController.swift */; };
 		F6870A17267AAB050066D00B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F6870A15267AAB050066D00B /* Main.storyboard */; };
 		F6870A19267AAB070066D00B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F6870A18267AAB070066D00B /* Assets.xcassets */; };
 		F6870A1C267AAB070066D00B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F6870A1A267AAB070066D00B /* LaunchScreen.storyboard */; };
+		F6C78D04267E9C7F003E38DE /* CollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C78D03267E9C7F003E38DE /* CollectionViewCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		F666E1CE267D42B700F89A4F /* PhotoAlbumViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAlbumViewController.swift; sourceTree = "<group>"; };
+		F666E1D2267DB1F800F89A4F /* NetworkRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkRequest.swift; sourceTree = "<group>"; };
+		F666E1D7267E613400F89A4F /* ErrorResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorResponse.swift; sourceTree = "<group>"; };
+		F666E1DA267E68FF00F89A4F /* fotoResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = fotoResponse.swift; sourceTree = "<group>"; };
+		F666E1DE267E7B4C00F89A4F /* DataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataModel.swift; sourceTree = "<group>"; };
 		F6870A0C267AAB050066D00B /* virtualTourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = virtualTourist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6870A0F267AAB050066D00B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F6870A11267AAB050066D00B /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -26,6 +35,7 @@
 		F6870A18267AAB070066D00B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F6870A1B267AAB070066D00B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		F6870A1D267AAB070066D00B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F6C78D03267E9C7F003E38DE /* CollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +49,41 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F666E1D1267DB1DB00F89A4F /* Network Request */ = {
+			isa = PBXGroup;
+			children = (
+				F666E1D2267DB1F800F89A4F /* NetworkRequest.swift */,
+			);
+			path = "Network Request";
+			sourceTree = "<group>";
+		};
+		F666E1D5267E60C000F89A4F /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				F666E1DD267E7AEA00F89A4F /* Data */,
+				F666E1D6267E60D500F89A4F /* Responses */,
+				F666E1D1267DB1DB00F89A4F /* Network Request */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		F666E1D6267E60D500F89A4F /* Responses */ = {
+			isa = PBXGroup;
+			children = (
+				F666E1D7267E613400F89A4F /* ErrorResponse.swift */,
+				F666E1DA267E68FF00F89A4F /* fotoResponse.swift */,
+			);
+			path = Responses;
+			sourceTree = "<group>";
+		};
+		F666E1DD267E7AEA00F89A4F /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				F666E1DE267E7B4C00F89A4F /* DataModel.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
 		F6870A03267AAB050066D00B = {
 			isa = PBXGroup;
 			children = (
@@ -59,10 +104,12 @@
 			isa = PBXGroup;
 			children = (
 				F6870A0F267AAB050066D00B /* AppDelegate.swift */,
+				F666E1D5267E60C000F89A4F /* Model */,
 				F6870A11267AAB050066D00B /* SceneDelegate.swift */,
 				F6870A13267AAB050066D00B /* TraveLocationMapController.swift */,
 				F6870A15267AAB050066D00B /* Main.storyboard */,
 				F666E1CE267D42B700F89A4F /* PhotoAlbumViewController.swift */,
+				F6C78D03267E9C7F003E38DE /* CollectionViewCell.swift */,
 				F6870A18267AAB070066D00B /* Assets.xcassets */,
 				F6870A1A267AAB070066D00B /* LaunchScreen.storyboard */,
 				F6870A1D267AAB070066D00B /* Info.plist */,
@@ -142,8 +189,13 @@
 			files = (
 				F6870A14267AAB050066D00B /* TraveLocationMapController.swift in Sources */,
 				F6870A10267AAB050066D00B /* AppDelegate.swift in Sources */,
+				F6C78D04267E9C7F003E38DE /* CollectionViewCell.swift in Sources */,
+				F666E1DB267E68FF00F89A4F /* fotoResponse.swift in Sources */,
 				F6870A12267AAB050066D00B /* SceneDelegate.swift in Sources */,
+				F666E1D8267E613400F89A4F /* ErrorResponse.swift in Sources */,
 				F666E1CF267D42B700F89A4F /* PhotoAlbumViewController.swift in Sources */,
+				F666E1D3267DB1F800F89A4F /* NetworkRequest.swift in Sources */,
+				F666E1DF267E7B4C00F89A4F /* DataModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

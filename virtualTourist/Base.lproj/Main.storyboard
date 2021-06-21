@@ -85,13 +85,27 @@
                                             <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                         </collectionViewFlowLayout>
                                         <cells>
-                                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="6vs-RX-xjW">
+                                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="CollectionViewCell" id="6vs-RX-xjW" customClass="CollectionViewCell" customModule="virtualTourist" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="bbt-aY-s2J">
+                                                <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" restorationIdentifier="CollectionViewCell" insetsLayoutMarginsFromSafeArea="NO" id="bbt-aY-s2J" customClass="CollectionViewCell" customModule="virtualTourist" customModuleProvider="target">
                                                     <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
                                                     <autoresizingMask key="autoresizingMask"/>
+                                                    <subviews>
+                                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="GrV-cP-WIL">
+                                                            <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
+                                                        </imageView>
+                                                    </subviews>
+                                                    <constraints>
+                                                        <constraint firstAttribute="bottom" secondItem="GrV-cP-WIL" secondAttribute="bottom" id="1B8-Ty-BBF"/>
+                                                        <constraint firstItem="GrV-cP-WIL" firstAttribute="top" secondItem="bbt-aY-s2J" secondAttribute="top" id="J9d-h5-zV1"/>
+                                                        <constraint firstItem="GrV-cP-WIL" firstAttribute="leading" secondItem="bbt-aY-s2J" secondAttribute="leading" id="JeI-ox-Lp1"/>
+                                                        <constraint firstAttribute="trailing" secondItem="GrV-cP-WIL" secondAttribute="trailing" id="qrv-cN-0zs"/>
+                                                    </constraints>
                                                 </collectionViewCellContentView>
+                                                <connections>
+                                                    <outlet property="imageView" destination="GrV-cP-WIL" id="MEb-oC-a0m"/>
+                                                </connections>
                                             </collectionViewCell>
                                         </cells>
                                     </collectionView>
@@ -99,6 +113,9 @@
                                         <rect key="frame" x="0.0" y="560.5" width="375" height="62.5"/>
                                         <color key="backgroundColor" systemColor="systemGray6Color"/>
                                         <state key="normal" title="New Collection "/>
+                                        <connections>
+                                            <action selector="loadPictures:" destination="4ZU-NZ-Kje" eventType="touchUpInside" id="YQG-FQ-ihV"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <constraints>
@@ -118,10 +135,15 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="jmT-k9-od7"/>
+                    <connections>
+                        <outlet property="collectionView" destination="V6f-QN-Ns8" id="fDW-4A-NXq"/>
+                        <outlet property="flowLayout" destination="V6f-QN-Ns8" id="5Ni-eK-jM4"/>
+                        <outlet property="mapView" destination="toC-0N-cD3" id="ptX-JH-xro"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="imy-al-gfM" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1241" y="43"/>
+            <point key="canvasLocation" x="1240.8" y="42.728635682158924"/>
         </scene>
     </scenes>
     <resources>
