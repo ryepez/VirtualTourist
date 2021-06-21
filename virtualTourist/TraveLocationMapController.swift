@@ -82,6 +82,8 @@ class TraveLocationMapController: UIViewController {
             pinView!.canShowCallout = true
             pinView!.pinTintColor = .red
             pinView!.animatesDrop = true
+            pinView!.isDraggable = true
+
             pinView!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
         }
         else {

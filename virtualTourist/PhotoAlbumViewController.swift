@@ -32,7 +32,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         //collectionView.isUserInteractionEnabled = true
 
         
-        NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius("37.9635", "-121.3297").url) { (reponse, error) in
+        NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius("37.9668", "-121.3692").url) { (reponse, error) in
         //saving the data to a object
             DataModel.photoArray = reponse
             //print(DataModel.photoArray.count)
@@ -59,7 +59,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                
         // Set the name and image
        
-        NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[(indexPath as NSIndexPath).row].url_q)!) { (image, error) in
+        NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[(indexPath as NSIndexPath).row].url_sq)!) { (image, error) in
             
             DispatchQueue.main.async {
                 cell.imageView?.image = image
@@ -71,16 +71,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
      }
      
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
+   // Marks: making the collectionView look better
+    
+ 
 }
 //center map with location send from the previous scene
 extension MKMapView {

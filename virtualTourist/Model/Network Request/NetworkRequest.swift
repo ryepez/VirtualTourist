@@ -26,7 +26,7 @@ class NetworkRequests {
             switch self {
             
             case .getPictureOneMileRadius(let lat, let lon):
-                return Endpoints.base + "flickr.photos.search&api_key=\(Auth.apiKey)&lat=\(lat)&lon=\(lon)&radius=1&radius_units=mi&per_page=20&page=1&format=json&nojsoncallback=1&extras=url_q"
+                return Endpoints.base + "flickr.photos.search&api_key=\(Auth.apiKey)&lat=\(lat)&lon=\(lon)&radius=1&radius_units=mi&per_page=100&page=1&format=json&nojsoncallback=1&extras=url_sq"
                 
             }
             

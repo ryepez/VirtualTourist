@@ -35,8 +35,8 @@ struct OnePhoto: Codable {
     let ispublic: Int
     let isfriend: Int
     let isfamily: Int
-    let url_q: String
-    let height_q: Int
-    let width_q: Int
+    let url_sq: String
+    let height_sq: Int
+    let width_sq: Int
     
 }
