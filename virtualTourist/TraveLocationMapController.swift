@@ -7,11 +7,18 @@
 
 import UIKit
 import MapKit
+import CoreData
 
 class TraveLocationMapController: UIViewController {
     @IBOutlet weak var mapView: MKMapView!
     
-           
+    // the pins who photos are being displayed
+    var pins: [Pin] = []
+    //maybe I dont need this here check later
+    var photos:[Foto] = []
+    
+    var dataController:DataController!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -29,6 +36,22 @@ class TraveLocationMapController: UIViewController {
         let dropPin = UILongPressGestureRecognizer(target: self, action: #selector(holdToDrop))
          mapView.addGestureRecognizer(dropPin)
         
+        //creatign a fetchRequest
+        let fetchRequest:NSFetchRequest<Pin> = Pin.fetchRequest()
+        //sorting the fetch request
+        let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        
+        //geting fetch and saving on the pin array
+        
+        if let result = try? dataController.viewContext.fetch(fetchRequest) {
+            pins = result
+            
+            print(pins[0].log)
+            
+                }
+        
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -37,10 +60,26 @@ class TraveLocationMapController: UIViewController {
     }
     
     func addAnnotation(location: CLLocationCoordinate2D){
-            let annotation = MKPointAnnotation()
-            annotation.coordinate = location
-            annotation.title = "Some Title"
-            self.mapView.addAnnotation(annotation)
+            
+      
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = location
+        annotation.title = "Photos"
+        //self.mapView.addAnnotation(annotation)
+        
+        //seting the pin data and saving it
+        let pin = Pin(context: dataController.viewContext)
+        pin.creationDate = Date()
+        pin.lat = annotation.coordinate.latitude
+        pin.log = annotation.coordinate.longitude
+        //saving the data
+        //inserting the pin on the pins array
+        pins.insert(pin, at: 0)
+      
+        self.mapView.addAnnotation(annotation)
+        try? dataController.viewContext.save()
+
+        
     }
     @objc func holdToDrop(sender: UIGestureRecognizer){
         if sender.state == .ended {
@@ -101,7 +140,16 @@ class TraveLocationMapController: UIViewController {
 
         }
     }
-  
+    
+    var numberOfPhotos: Int { return photos.count }
+    
+    func photo(at indexPath: IndexPath) -> Foto {
+        return photos[indexPath.row]
+    }
+    
+    func addPin() {
+        
+    }
     
 }
 

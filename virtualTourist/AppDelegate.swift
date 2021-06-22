@@ -10,6 +10,12 @@ import UIKit
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    
+    
+    // load our dataController
+    
+    
+    // check if app has ran before and saves user preference
     func checkIfFirstLaunch() {
         
         if UserDefaults.standard.bool(forKey: "hasLaunchBefore") {
@@ -28,6 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         print("App Delegate: will finish launching")
         
         checkIfFirstLaunch()
+        //loading data from persistance
         return true
     }
 
