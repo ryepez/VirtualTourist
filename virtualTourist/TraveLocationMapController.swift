@@ -46,12 +46,24 @@ class TraveLocationMapController: UIViewController {
         
         if let result = try? dataController.viewContext.fetch(fetchRequest) {
             pins = result
-            
-            print(pins[0].log)
+        
+            //put the pins from storage on the screen
+            displayPinFromStorage()
             
                 }
         
-        
+    }
+    
+    func displayPinFromStorage() {
+       
+        for index in pins {
+            let annotation = MKPointAnnotation()
+            let location = CLLocationCoordinate2D(latitude: index.lat, longitude: index.log)
+            annotation.coordinate = location
+            annotation.title = "Photos"
+            self.mapView.addAnnotation(annotation)
+
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -81,6 +93,13 @@ class TraveLocationMapController: UIViewController {
 
         
     }
+     
+        
+    
+        //mapView.addAnnotation(annotation)
+        
+        
+    
     @objc func holdToDrop(sender: UIGestureRecognizer){
         if sender.state == .ended {
             let locationInView = sender.location(in: mapView)
@@ -121,7 +140,7 @@ class TraveLocationMapController: UIViewController {
             pinView!.canShowCallout = true
             pinView!.pinTintColor = .red
             pinView!.animatesDrop = true
-            pinView!.isDraggable = true
+          //  pinView!.isDraggable = true
 
             pinView!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
         }
