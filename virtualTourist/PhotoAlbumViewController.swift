@@ -7,6 +7,7 @@
 
 import UIKit
 import MapKit
+import CoreData
 
 class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
    
@@ -17,6 +18,16 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
 @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
 
     @IBOutlet weak var mapView: MKMapView!
+    
+    //setting the container for the data 
+    var pin: Pin!
+    var photos:[Foto] = []
+    //injecting the data source
+
+    
+    var dataController: DataController!
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,15 +41,18 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         navigationController?.setNavigationBarHidden(false, animated: true)
         // do this later to add the hold touch to delete picture
         //collectionView.isUserInteractionEnabled = true
-
-        
-        NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius("37.9668", "-121.3692").url) { (reponse, error) in
+        print(pin.lat)
+        NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log)).url) { (reponse, error) in
         //saving the data to a object
             DataModel.photoArray = reponse
             //print(DataModel.photoArray.count)
         }
     }
     
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        DataModel.photoArray = []
+    }
     @IBAction func loadPictures(_ sender: UIButton) {
       
       

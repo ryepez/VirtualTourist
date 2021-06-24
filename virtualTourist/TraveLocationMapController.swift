@@ -9,16 +9,19 @@ import UIKit
 import MapKit
 import CoreData
 
-class TraveLocationMapController: UIViewController {
+class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDelegate {
     @IBOutlet weak var mapView: MKMapView!
     
     // the pins who photos are being displayed
-    var pins: [Pin] = []
+   // var pins: [Pin] = []
+  //  var photos:[Foto] = []
+
     //maybe I dont need this here check later
-    var photos:[Foto] = []
     
-    var dataController:DataController!
+    var dataController: DataController!
+    var fetchedResultsController: NSFetchedResultsController<Pin>!
     
+   
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -33,39 +36,21 @@ class TraveLocationMapController: UIViewController {
         setupLastMapLocation()
         
         //creating the gesture hold and press
-        let dropPin = UILongPressGestureRecognizer(target: self, action: #selector(holdToDrop))
+        let dropPin = UILongPressGestureRecognizer(target: self, action: #selector(longToDrop))
+        
          mapView.addGestureRecognizer(dropPin)
         
-        //creatign a fetchRequest
-        let fetchRequest:NSFetchRequest<Pin> = Pin.fetchRequest()
-        //sorting the fetch request
-        let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
-        fetchRequest.sortDescriptors = [sortDescriptor]
+        setUpFetchedResultsController()
         
-        //geting fetch and saving on the pin array
-        
-        if let result = try? dataController.viewContext.fetch(fetchRequest) {
-            pins = result
-        
-            //put the pins from storage on the screen
-            displayPinFromStorage()
-            
-                }
         
     }
     
-    func displayPinFromStorage() {
-       
-        for index in pins {
-            let annotation = MKPointAnnotation()
-            let location = CLLocationCoordinate2D(latitude: index.lat, longitude: index.log)
-            annotation.coordinate = location
-            annotation.title = "Photos"
-            self.mapView.addAnnotation(annotation)
-
-        }
-    }
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        //fetchedResultsController = nil
     
+    }
     override func viewWillAppear(_ animated: Bool) {
         //hidding the navigation controller
         navigationController?.setNavigationBarHidden(true, animated: false)
@@ -77,7 +62,6 @@ class TraveLocationMapController: UIViewController {
         let annotation = MKPointAnnotation()
         annotation.coordinate = location
         annotation.title = "Photos"
-        //self.mapView.addAnnotation(annotation)
         
         //seting the pin data and saving it
         let pin = Pin(context: dataController.viewContext)
@@ -85,23 +69,56 @@ class TraveLocationMapController: UIViewController {
         pin.lat = annotation.coordinate.latitude
         pin.log = annotation.coordinate.longitude
         //saving the data
-        //inserting the pin on the pins array
-        pins.insert(pin, at: 0)
-      
-        self.mapView.addAnnotation(annotation)
         try? dataController.viewContext.save()
 
+        mapView.addAnnotation(annotation)
+
+        fetchDataAgain()
         
     }
-     
+    
+    fileprivate func fetchDataAgain() {
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            fatalError("The fetch could not be performed: \(error.localizedDescription )")
+        }
+    }
+    
+    fileprivate func setUpFetchedResultsController() {
+        //creatign a fetchRequest
+        let fetchRequest:NSFetchRequest<Pin> = Pin.fetchRequest()
+        //sorting the fetch request
+        let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        fetchedResultsController.delegate = self
+        
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            fatalError("The fetch could not be performed: \(error.localizedDescription )")
+        }
+        
+        for index in fetchedResultsController.fetchedObjects! {
+                 let annotation = MKPointAnnotation()
+                 let location = CLLocationCoordinate2D(latitude: index.lat, longitude: index.log)
+                 annotation.coordinate = location
+                 annotation.title = "Photos"
+                 self.mapView.addAnnotation(annotation)
+
+             }
+    }
+    
+  
+        
         
     
-        //mapView.addAnnotation(annotation)
-        
-        
-    
-    @objc func holdToDrop(sender: UIGestureRecognizer){
+    @objc func longToDrop(sender: UIGestureRecognizer){
         if sender.state == .ended {
+            
             let locationInView = sender.location(in: mapView)
             let locationOnMap = mapView.convert(locationInView, toCoordinateFrom: mapView)
             
@@ -151,28 +168,48 @@ class TraveLocationMapController: UIViewController {
         return pinView
     }
     
+    
+   
+    
+   /* func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        
+        //removing from the UI
+        mapView.removeAnnotation(mapView.selectedAnnotations[0])
+          
+    }
+ */
     // Method does the segue when user taps the pin
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         if control == view.rightCalloutAccessoryView {
-         
-            performSegue(withIdentifier: "photoAlbumViewController", sender: self)
+        performSegue(withIdentifier: "photoAlbumViewController", sender: self)
 
         }
     }
     
-    var numberOfPhotos: Int { return photos.count }
     
-    func photo(at indexPath: IndexPath) -> Foto {
-        return photos[indexPath.row]
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let vc = segue.destination as? PhotoAlbumViewController {
+            if let pins = fetchedResultsController.fetchedObjects {
+                //selected pin at that moment
+                let annotation = mapView.selectedAnnotations[0]
+                //to get the indexpath by looking
+                guard let indexPath = pins.firstIndex(where: { (pin) -> Bool in
+                    //it return that location where this condition is met
+                    pin.lat == annotation.coordinate.latitude && pin.log == annotation.coordinate.longitude
+                }) else {
+                    return
+                }
+            vc.pin = pins[indexPath]
+            vc.dataController = dataController
+        }
+
     }
     
-    func addPin() {
-        
-    }
-    
+   
 }
 
-
+}
 
 
 extension TraveLocationMapController: MKMapViewDelegate {
@@ -204,4 +241,5 @@ extension TraveLocationMapController: MKMapViewDelegate {
     }
 
 }
+
 
