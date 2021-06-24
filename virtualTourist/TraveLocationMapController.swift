@@ -10,6 +10,9 @@ import MapKit
 import CoreData
 
 class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDelegate {
+    
+ 
+    
     @IBOutlet weak var mapView: MKMapView!
     
     // the pins who photos are being displayed
@@ -37,9 +40,9 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
         
         //creating the gesture hold and press
         let dropPin = UILongPressGestureRecognizer(target: self, action: #selector(longToDrop))
+        mapView.addGestureRecognizer(dropPin)
         
-         mapView.addGestureRecognizer(dropPin)
-        
+
         setUpFetchedResultsController()
         
         
@@ -56,6 +59,8 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
         navigationController?.setNavigationBarHidden(true, animated: false)
     }
     
+    
+
     func addAnnotation(location: CLLocationCoordinate2D){
             
       
@@ -160,6 +165,7 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
           //  pinView!.isDraggable = true
 
             pinView!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
+            pinView!.leftCalloutAccessoryView = UIButton(type: .close)
         }
         else {
             pinView!.annotation = annotation
@@ -168,24 +174,38 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
         return pinView
     }
     
-    
-   
-    
-   /* func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        
-        //removing from the UI
-        mapView.removeAnnotation(mapView.selectedAnnotations[0])
-          
-    }
- */
+
     // Method does the segue when user taps the pin
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         if control == view.rightCalloutAccessoryView {
         performSegue(withIdentifier: "photoAlbumViewController", sender: self)
-
         }
+        
+        if control == view.leftCalloutAccessoryView {
+       
+        //deleting the pin from the array
+            if let pins = fetchedResultsController.fetchedObjects {
+                //selected pin at that moment
+                let annotation = mapView.selectedAnnotations[0]
+                //to get the indexpath by looking
+                guard let indexPath = pins.firstIndex(where: { (pin) -> Bool in
+                    //it return that location where this condition is met
+                    pin.lat == annotation.coordinate.latitude && pin.log == annotation.coordinate.longitude
+                }) else {
+                    return
+                }
+                //getting pip to be deleted
+                let pinToDelete = pins[indexPath]
+                dataController.viewContext.delete(pinToDelete)
+            }
+        //saving those changes
+        try? dataController.viewContext.save()
+        //deleting the pin from the UI
+        mapView.removeAnnotation(mapView.selectedAnnotations[0])
+        }
+        
+      
     }
-    
     
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -200,7 +220,7 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
                 }) else {
                     return
                 }
-            vc.pin = pins[indexPath]
+                vc.pin = pins[indexPath]
             vc.dataController = dataController
         }
 
