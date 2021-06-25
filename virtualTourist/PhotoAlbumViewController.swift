@@ -31,21 +31,25 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        // format to display pictures
+        
+        
         //delegates and data sources
         collectionView.delegate = self
         collectionView.dataSource = self
+        
+        
         
         // Do any additional setup after loading the view.
         
         navigationController?.setNavigationBarHidden(false, animated: true)
         // do this later to add the hold touch to delete picture
         //collectionView.isUserInteractionEnabled = true
-        print(pin.lat)
         NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log)).url) { (reponse, error) in
         //saving the data to a object
+            
             DataModel.photoArray = reponse
-            //print(DataModel.photoArray.count)
+           // print(DataModel.photoArray)
         }
     }
     
@@ -74,6 +78,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         // Set the name and image
        
         NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[(indexPath as NSIndexPath).row].url_sq)!) { (image, error) in
+           
+            let foto = Foto(context: self.dataController.viewContext)
+            foto.downloadDate = Date()
+            
+            //saving the data
+            try? self.dataController.viewContext.save()
             
             DispatchQueue.main.async {
                 cell.imageView?.image = image
