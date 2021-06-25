@@ -9,29 +9,26 @@ import UIKit
 import MapKit
 import CoreData
 
-class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate {
    
   
 
 @IBOutlet weak var collectionView: UICollectionView!
-        
 @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
-
-    @IBOutlet weak var mapView: MKMapView!
+@IBOutlet weak var mapView: MKMapView!
     
     //setting the container for the data 
     var pin: Pin!
-    var photos:[Foto] = []
+    //var photos:[Foto] = []
     //injecting the data source
-
-    
     var dataController: DataController!
+    var fetchedResultsController: NSFetchedResultsController<Foto>!
+
     
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // format to display pictures
         
         
         //delegates and data sources
@@ -51,6 +48,22 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
            // print(DataModel.photoArray)
         }
         
+        settingUpOriginalLocation()
+        settiUpFetchResults()
+    }
+    
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        DataModel.photoArray = []
+    }
+    @IBAction func loadPictures(_ sender: UIButton) {
+      
+       
+        collectionView.reloadData()
+        
+        }
+    
+    fileprivate func settingUpOriginalLocation() {
         //setting the initial location
         let initialLocation = CLLocation(latitude:pin.lat, longitude: pin.log)
         centerToLocation(initialLocation)
@@ -60,43 +73,55 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         
         annotation.coordinate = CLLocationCoordinate2D(latitude: pin.lat, longitude: pin.log)
         mapView.addAnnotation(annotation)
+    }
+    
+    fileprivate func settiUpFetchResults() {
         //selects the first annotation so when going to the screen it shows selected
-    }
-    
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        DataModel.photoArray = []
-    }
-    @IBAction func loadPictures(_ sender: UIButton) {
-      
-      
-       
-        collectionView.reloadData()
         
+        
+        let fetchRequest:NSFetchRequest<Foto> = Foto.fetchRequest()
+        let predicate = NSPredicate(format: "pin == %@", pin)
+        fetchRequest.predicate = predicate
+        //sorting the fetch request
+        let sortDescriptor = NSSortDescriptor(key: "downloadDate", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        fetchedResultsController.delegate = self
+        
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            fatalError("The fetch could not be performed: \(error.localizedDescription )")
         }
+    }
+    
     
 
      func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return DataModel.photoArray.count
      }
      
+
+    
      func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
          
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
                
-        // Set the name and image
        
+        
         NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[(indexPath as NSIndexPath).row].url_sq)!) { (image, error) in
            
-           // let foto = Foto(context: self.dataController.viewContext)
-            //foto.downloadDate = Date()
-           // foto.imageToUse =
+            let foto = Foto(context: self.dataController.viewContext)
+            foto.downloadDate = Date()
+            foto.imageToUse = image
             //saving the data
-          //  try? self.dataController.viewContext.save()
-            
+            try? self.dataController.viewContext.save()
+        
             DispatchQueue.main.async {
-                cell.imageView?.image = image
+                cell.imageView?.image = UIImage(data: image!)
             }
         }
     
@@ -105,7 +130,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
      }
      
 
-   // Marks: making the collectionView look better
     
  
 }

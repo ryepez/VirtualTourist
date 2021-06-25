@@ -84,17 +84,16 @@ class NetworkRequests {
         }
     }
     
-    class func imageRequest(url: URL, completionHandler: @escaping (UIImage?, Error?) -> Void){
+    class func imageRequest(url: URL, completionHandler: @escaping (Data?, Error?) -> Void){
         let task = URLSession.shared.downloadTask(with: url) {(location, response, error) in
             guard let location = location else {
                 completionHandler(nil, error)
                 return
             }
         
-                
-            let imageData = try! Data(contentsOf: location)
-            let image = UIImage(data: imageData)
-            completionHandler(image, nil)
+                let imageData = try! Data(contentsOf: location)
+                  completionHandler(imageData, nil)
+         
         
         }
         task.resume()
