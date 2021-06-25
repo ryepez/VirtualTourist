@@ -47,10 +47,20 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         //collectionView.isUserInteractionEnabled = true
         NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log)).url) { (reponse, error) in
         //saving the data to a object
-            
             DataModel.photoArray = reponse
            // print(DataModel.photoArray)
         }
+        
+        //setting the initial location
+        let initialLocation = CLLocation(latitude:pin.lat, longitude: pin.log)
+        centerToLocation(initialLocation)
+        
+        //adding the pin
+        let annotation = MKPointAnnotation()
+        
+        annotation.coordinate = CLLocationCoordinate2D(latitude: pin.lat, longitude: pin.log)
+        mapView.addAnnotation(annotation)
+        //selects the first annotation so when going to the screen it shows selected
     }
     
     
@@ -79,11 +89,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
        
         NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[(indexPath as NSIndexPath).row].url_sq)!) { (image, error) in
            
-            let foto = Foto(context: self.dataController.viewContext)
-            foto.downloadDate = Date()
-            
+           // let foto = Foto(context: self.dataController.viewContext)
+            //foto.downloadDate = Date()
+           // foto.imageToUse =
             //saving the data
-            try? self.dataController.viewContext.save()
+          //  try? self.dataController.viewContext.save()
             
             DispatchQueue.main.async {
                 cell.imageView?.image = image
@@ -100,7 +110,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
  
 }
 //center map with location send from the previous scene
-extension MKMapView {
+extension PhotoAlbumViewController {
     func centerToLocation(
         _ location: CLLocation,
         regionRadius: CLLocationDistance = 1000
@@ -109,7 +119,10 @@ extension MKMapView {
             center: location.coordinate,
             latitudinalMeters: regionRadius,
             longitudinalMeters: regionRadius)
-        setRegion(coordinateRegion, animated: true)
+        DispatchQueue.main.async {
+            self.mapView.setRegion(coordinateRegion, animated: true)
+
+        }
     }
 
 }
