@@ -19,7 +19,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     //setting the container for the data 
     var pin: Pin!
-    //var photos:[Foto] = []
+    var photos:[Foto] = []
     //injecting the data source
     var dataController: DataController!
     var fetchedResultsController: NSFetchedResultsController<Foto>!
@@ -36,7 +36,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         collectionView.dataSource = self
         
         
-        
         // Do any additional setup after loading the view.
         
         navigationController?.setNavigationBarHidden(false, animated: true)
@@ -50,6 +49,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         
         settingUpOriginalLocation()
         settiUpFetchResults()
+        
+    
     }
     
     
@@ -103,7 +104,25 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         return DataModel.photoArray.count
      }
      
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        
+        
+        NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[(indexPath as NSIndexPath).row].url_sq)!) { (image, error) in
+            
+            DispatchQueue.main.async { [self] in
+                let foto = Foto(context: self.dataController.viewContext)
+                foto.downloadDate = Date()
+                foto.imageToUse = image
+                //saving the data
+                try? self.dataController.viewContext.save()
+                print(self.fetchedResultsController.fetchedObjects?.count)
 
+            }
+         
+        }
+        
+    }
     
      func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
          
@@ -111,19 +130,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
                
        
+        cell.imageView?.image = UIImage(named: "myimage")
         
-        NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[(indexPath as NSIndexPath).row].url_sq)!) { (image, error) in
-           
-            let foto = Foto(context: self.dataController.viewContext)
-            foto.downloadDate = Date()
-            foto.imageToUse = image
-            //saving the data
-            try? self.dataController.viewContext.save()
-        
-            DispatchQueue.main.async {
-                cell.imageView?.image = UIImage(data: image!)
-            }
-        }
     
         
         return cell
