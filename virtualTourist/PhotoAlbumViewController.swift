@@ -19,12 +19,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     //setting the container for the data 
     var pin: Pin!
-    var photos:[Foto] = []
+    var photos:Foto!
     //injecting the data source
     var dataController: DataController!
+    
     var fetchedResultsController: NSFetchedResultsController<Foto>!
 
-    
     
     
     override func viewDidLoad() {
@@ -40,16 +40,18 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         
         navigationController?.setNavigationBarHidden(false, animated: true)
         // do this later to add the hold touch to delete picture
-        //collectionView.isUserInteractionEnabled = true
+        
         NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log)).url) { (reponse, error) in
         //saving the data to a object
             DataModel.photoArray = reponse
-           // print(DataModel.photoArray)
+            self.collectionView.reloadData()
         }
         
         settingUpOriginalLocation()
         settiUpFetchResults()
         
+
+        print(fetchedResultsController.fetchedObjects?.count ?? 01)
     
     }
     
@@ -102,7 +104,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
 
      func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return DataModel.photoArray.count
-     }
+        }
      
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
@@ -110,18 +112,32 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         
         NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[(indexPath as NSIndexPath).row].url_sq)!) { (image, error) in
             
-            DispatchQueue.main.async { [self] in
+            DispatchQueue.main.async {
+                
                 let foto = Foto(context: self.dataController.viewContext)
+                foto.pin = self.pin
                 foto.downloadDate = Date()
                 foto.imageToUse = image
                 //saving the data
-                try? self.dataController.viewContext.save()
-                print(self.fetchedResultsController.fetchedObjects?.count)
-
+                do {
+                    try self.dataController.viewContext.save()
+                } catch {
+                    print(error.localizedDescription)
+                }
+                
             }
          
         }
         
+        
+    }
+    
+    fileprivate func fetchDataAgain() {
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            fatalError("The fetch could not be performed: \(error.localizedDescription )")
+        }
     }
     
      func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -130,10 +146,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
                
        
-        cell.imageView?.image = UIImage(named: "myimage")
+        cell.imageView?.image = UIImage(data: fetchedResultsController.object(at: indexPath).imageToUse!)
         
     
-        
         return cell
      }
      
