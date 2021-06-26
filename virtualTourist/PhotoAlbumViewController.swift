@@ -41,17 +41,24 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         navigationController?.setNavigationBarHidden(false, animated: true)
         // do this later to add the hold touch to delete picture
         
-        NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log)).url) { (reponse, error) in
-        //saving the data to a object
-            DataModel.photoArray = reponse
-            self.collectionView.reloadData()
-        }
         
         settingUpOriginalLocation()
         settiUpFetchResults()
         
 
-        print(fetchedResultsController.fetchedObjects?.count ?? 01)
+        
+        if fetchedResultsController.fetchedObjects?.count == nil {
+            
+            NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log)).url) { (reponse, error) in
+            //saving the data to a object
+                DataModel.photoArray = reponse
+                self.collectionView.reloadData()
+            }
+            
+        } else {
+            
+            self.collectionView.reloadData()
+        }
     
     }
     
@@ -103,13 +110,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
 
      func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return DataModel.photoArray.count
+        return fetchedResultsController.sections?[section].numberOfObjects ?? 0
         }
      
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         
         
+        if fetchedResultsController.fetchedObjects?.count == nil {
         NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[(indexPath as NSIndexPath).row].url_sq)!) { (image, error) in
             
             DispatchQueue.main.async {
@@ -128,7 +136,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
             }
          
         }
-        
+            
+        }
         
     }
     
