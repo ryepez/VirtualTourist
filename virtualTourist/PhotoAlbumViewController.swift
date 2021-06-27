@@ -35,6 +35,13 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         collectionView.delegate = self
         collectionView.dataSource = self
         
+        //makes the collection view looks nice with 3 columns
+        let space: CGFloat = 3.0
+        let dimension = (view.frame.size.width - (2*space)) / 3.0
+        
+        flowLayout.minimumLineSpacing = space
+        flowLayout.minimumInteritemSpacing = space
+        flowLayout.itemSize = CGSize(width: dimension, height: dimension)
         
         // Do any additional setup after loading the view.
         
@@ -45,10 +52,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         settingUpOriginalLocation()
         settiUpFetchResults()
         
-
         
-        if fetchedResultsController.fetchedObjects?.count == nil {
-            
+        guard let count = fetchedResultsController.fetchedObjects?.count else {
+            return
+        }
+        
+            if count == 0 {
             NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log)).url) { (reponse, error) in
             //saving the data to a object
                 DataModel.photoArray = reponse
@@ -56,10 +65,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
             }
             
         } else {
-            
-            self.collectionView.reloadData()
+            print("we are on the else section")
         }
-    
+            
+
     }
     
     
@@ -68,10 +77,25 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     }
     @IBAction func loadPictures(_ sender: UIButton) {
       
-       
-        collectionView.reloadData()
-        
+   /*     if let index = fetchedResultsController.fetchedObjects?.indices {
+            for i in index {
+                let indexPath = IndexPath(row: i, section: 0)
+                deleteFoto(at: indexPath)
+            }
+                
         }
+      */
+        
+    }
+                
+    func deleteFoto(at indexPath: IndexPath) {
+        
+        let fotoToDelete = fetchedResultsController.object(at: indexPath)
+        dataController.viewContext.delete(fotoToDelete)
+        try? dataController.viewContext.save()
+    }
+                
+                
     
     fileprivate func settingUpOriginalLocation() {
         //setting the initial location
@@ -116,8 +140,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         
+        guard let count = fetchedResultsController.fetchedObjects?.count else {
+            return
+        }
         
-        if fetchedResultsController.fetchedObjects?.count == nil {
+        if count == 0 {
         NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[(indexPath as NSIndexPath).row].url_sq)!) { (image, error) in
             
             DispatchQueue.main.async {
@@ -126,6 +153,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                 foto.pin = self.pin
                 foto.downloadDate = Date()
                 foto.imageToUse = image
+                print(Date())
                 //saving the data
                 do {
                     try self.dataController.viewContext.save()
