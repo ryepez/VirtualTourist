@@ -30,10 +30,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         //delegates and data sources
         collectionView.delegate = self
         collectionView.dataSource = self
+        
+       
         
         //makes the collection view looks nice with 3 columns
         let space: CGFloat = 3.0
@@ -49,26 +50,45 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         // do this later to add the hold touch to delete picture
         
         
+        
+    
+        
         settingUpOriginalLocation()
         settiUpFetchResults()
         
         
-        guard let count = fetchedResultsController.fetchedObjects?.count else {
-            return
+        if let count = fetchedResultsController.fetchedObjects?.count {
+            
+            if count == 0 {
+                //getting the URLS of the fotos
+                NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log)).url) { (reponse, error) in
+                //saving the data to a object
+                    DataModel.photoArray = reponse
+                    //downloading fotos and saving them
+                    for index in DataModel.photoArray.indices {
+                        NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[index].url_sq)!) { (image, error) in
+
+                            DispatchQueue.main.async { [self] in
+                                let foto = Foto(context: self.dataController.viewContext)
+                                foto.downloadDate = Date()
+                                foto.imageToUse = image
+                                foto.pin = self.pin
+                                //saving the data
+                                try? self.dataController.viewContext.save()
+                            }
+                        }
+                    }
+                }
+                             
+                
+            } else {
+                collectionView.reloadData()
+            }
         }
         
-            if count == 0 {
-            NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log)).url) { (reponse, error) in
-            //saving the data to a object
-                DataModel.photoArray = reponse
-                self.collectionView.reloadData()
-            }
-            
-        } else {
-            print("we are on the else section")
-        }
-            
-
+        
+        
+        
     }
     
     
@@ -76,7 +96,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         DataModel.photoArray = []
     }
     @IBAction func loadPictures(_ sender: UIButton) {
-      
+        fetchDataAgain()
+        
    /*     if let index = fetchedResultsController.fetchedObjects?.indices {
             for i in index {
                 let indexPath = IndexPath(row: i, section: 0)
@@ -134,40 +155,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
 
      func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        
         return fetchedResultsController.sections?[section].numberOfObjects ?? 0
         }
      
-    
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        
-        guard let count = fetchedResultsController.fetchedObjects?.count else {
-            return
-        }
-        
-        if count == 0 {
-        NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[(indexPath as NSIndexPath).row].url_sq)!) { (image, error) in
-            
-            DispatchQueue.main.async {
-                
-                let foto = Foto(context: self.dataController.viewContext)
-                foto.pin = self.pin
-                foto.downloadDate = Date()
-                foto.imageToUse = image
-                print(Date())
-                //saving the data
-                do {
-                    try self.dataController.viewContext.save()
-                } catch {
-                    print(error.localizedDescription)
-                }
-                
-            }
-         
-        }
-            
-        }
-        
-    }
+   
     
     fileprivate func fetchDataAgain() {
         do {
@@ -175,16 +167,21 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         } catch {
             fatalError("The fetch could not be performed: \(error.localizedDescription )")
         }
+        collectionView.reloadData()
     }
+    
+    
     
      func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
          
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
-               
-       
-        cell.imageView?.image = UIImage(data: fetchedResultsController.object(at: indexPath).imageToUse!)
         
+    
+      
+            
+            cell.imageView?.image = UIImage(data: fetchedResultsController.object(at: indexPath).imageToUse!)
+       
     
         return cell
      }
