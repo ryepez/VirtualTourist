@@ -10,6 +10,7 @@ import UIKit
 
 class NetworkRequests {
     
+    
     struct Auth {
         static var apiKey = "49486a458e82e1d5f7b2b1c95b324cff"
     }
@@ -19,14 +20,14 @@ class NetworkRequests {
         
         
         
-        case getPictureOneMileRadius(String, String)
+        case getPictureOneMileRadius(String, String, String)
     
         
         var stringValue: String {
             switch self {
             
-            case .getPictureOneMileRadius(let lat, let lon):
-                return Endpoints.base + "flickr.photos.search&api_key=\(Auth.apiKey)&lat=\(lat)&lon=\(lon)&radius=1&radius_units=mi&per_page=100&page=1&format=json&nojsoncallback=1&extras=url_sq"
+            case .getPictureOneMileRadius(let lat, let lon, let pageNumber):
+                return Endpoints.base + "flickr.photos.search&api_key=\(Auth.apiKey)&lat=\(lat)&lon=\(lon)&radius=1&radius_units=mi&per_page=10&page=\(pageNumber)&format=json&nojsoncallback=1&extras=url_sq"
                 
             }
             

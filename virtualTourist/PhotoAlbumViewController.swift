@@ -25,7 +25,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     var fetchedResultsController: NSFetchedResultsController<Foto>!
 
-    
+    var pageNumber = String((arc4random() % 3) + 1)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,7 +34,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         collectionView.delegate = self
         collectionView.dataSource = self
         
-       
+        collectionView.isUserInteractionEnabled = true
+
+
         
         //makes the collection view looks nice with 3 columns
         let space: CGFloat = 3.0
@@ -61,7 +63,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
             
             if count == 0 {
                 //getting the URLS of the fotos
-                NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log)).url) { (reponse, error) in
+                print("I am here")
+                NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log), pageNumber).url) { (reponse, error) in
                 //saving the data to a object
                     DataModel.photoArray = reponse
                     //downloading fotos and saving them
@@ -75,6 +78,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                                 foto.pin = self.pin
                                 //saving the data
                                 try? self.dataController.viewContext.save()
+                                
                             }
                         }
                     }
@@ -96,17 +100,50 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         DataModel.photoArray = []
     }
     @IBAction func loadPictures(_ sender: UIButton) {
-        fetchDataAgain()
-        
-   /*     if let index = fetchedResultsController.fetchedObjects?.indices {
-            for i in index {
-                let indexPath = IndexPath(row: i, section: 0)
-                deleteFoto(at: indexPath)
-            }
+
+        pageNumber = String((arc4random() % 3) + 1)
+     
+        if let count = fetchedResultsController.fetchedObjects?.count {
+            if count == 0 {
+                fetchDataAgain()
+                collectionView.reloadData()
                 
-        }
-      */
-        
+            } else {
+                //delete images
+                if let index = fetchedResultsController.fetchedObjects?.indices {
+                         for i in index {
+                             let indexPath = IndexPath(row: i, section: 0)
+                             deleteFoto(at: indexPath)
+                         }
+                
+                    NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log), pageNumber).url) { (reponse, error) in
+                    //saving the data to a object
+                        DataModel.photoArray = reponse
+                        //downloading fotos and saving them
+                        for index in DataModel.photoArray.indices {
+                            NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[index].url_sq)!) { (image, error) in
+
+                                DispatchQueue.main.async { [self] in
+                                    let foto = Foto(context: self.dataController.viewContext)
+                                    foto.downloadDate = Date()
+                                    foto.imageToUse = image
+                                    foto.pin = self.pin
+                                    //saving the data
+                                    try? self.dataController.viewContext.save()
+                                    self.fetchDataAgain()
+                                    self.collectionView.reloadData()
+                                }
+                            }
+                        }
+                    }
+                
+                }
+                
+                    
+                
+            }
+    }
+ 
     }
                 
     func deleteFoto(at indexPath: IndexPath) {
@@ -153,6 +190,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     }
     
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+     print("You have selected")
+      //  deleteFoto(at: indexPath)
+       /// collectionView.deleteItems(at: [indexPath])
+
+
+    }
+    
 
      func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
@@ -167,7 +212,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         } catch {
             fatalError("The fetch could not be performed: \(error.localizedDescription )")
         }
-        collectionView.reloadData()
     }
     
     
@@ -177,16 +221,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
         
-    
-      
-            
             cell.imageView?.image = UIImage(data: fetchedResultsController.object(at: indexPath).imageToUse!)
        
     
         return cell
      }
      
-
+  
+  
     
  
 }
