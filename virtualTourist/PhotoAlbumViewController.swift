@@ -31,14 +31,15 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         super.viewDidLoad()
         
         //delegates and data sources
-        collectionView.delegate = self
-        collectionView.dataSource = self
+        //collectionView.delegate = self
+        //collectionView.dataSource = self
         
-        collectionView.isUserInteractionEnabled = true
+        //collectionView.allowsSelection = true
+        //collectionView.isUserInteractionEnabled = true
 
 
         
-        //makes the collection view looks nice with 3 columns
+        /* makes the collection view looks nice with 3 columns
         let space: CGFloat = 3.0
         let dimension = (view.frame.size.width - (2*space)) / 3.0
         
@@ -47,11 +48,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         flowLayout.itemSize = CGSize(width: dimension, height: dimension)
         
         // Do any additional setup after loading the view.
-        
+         */
         navigationController?.setNavigationBarHidden(false, animated: true)
         // do this later to add the hold touch to delete picture
-        
-        
+       
         
     
         
@@ -69,18 +69,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                     DataModel.photoArray = reponse
                     //downloading fotos and saving them
                     for index in DataModel.photoArray.indices {
-                        NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[index].url_sq)!) { (image, error) in
-
-                            DispatchQueue.main.async { [self] in
-                                let foto = Foto(context: self.dataController.viewContext)
-                                foto.downloadDate = Date()
-                                foto.imageToUse = image
-                                foto.pin = self.pin
-                                //saving the data
-                                try? self.dataController.viewContext.save()
-                                
-                            }
+                        
+                        guard let URLForImage =  URL(string: DataModel.photoArray[index].url_sq) else {
+                            return
                         }
+                       
+                        NetworkRequests.imageRequest(url: URLForImage, completionHandler: self.handleImageFileResponse(image:error:))
                     }
                 }
                              
@@ -90,8 +84,20 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
             }
         }
         
+    }
+    
+    func handleImageFileResponse(image: Data?, error: Error?) {
         
-        
+        DispatchQueue.main.async {
+            
+            let foto = Foto(context: self.dataController.viewContext)
+            foto.downloadDate = Date()
+            foto.imageToUse = image
+            foto.pin = self.pin
+            
+            //saving the data
+            try? self.dataController.viewContext.save()
+        }
         
     }
     
@@ -198,7 +204,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
 
     }
     
-
+    
      func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
         return fetchedResultsController.sections?[section].numberOfObjects ?? 0
