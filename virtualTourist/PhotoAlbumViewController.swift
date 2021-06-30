@@ -9,7 +9,7 @@ import UIKit
 import MapKit
 import CoreData
 
-class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate {
+class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
    
   
 
@@ -39,7 +39,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
 
 
         
-        /* makes the collection view looks nice with 3 columns
+        // makes the collection view looks nice with 3 columns
         let space: CGFloat = 3.0
         let dimension = (view.frame.size.width - (2*space)) / 3.0
         
@@ -48,7 +48,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         flowLayout.itemSize = CGSize(width: dimension, height: dimension)
         
         // Do any additional setup after loading the view.
-         */
+        
         navigationController?.setNavigationBarHidden(false, animated: true)
         // do this later to add the hold touch to delete picture
        
@@ -197,10 +197,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-     print("You have selected")
-      //  deleteFoto(at: indexPath)
-       /// collectionView.deleteItems(at: [indexPath])
-
+     print("You have delete this picture!")
+    
+        let pictureToBeDeleted = fetchedResultsController.object(at: indexPath)
+        
+        dataController.viewContext.delete(pictureToBeDeleted)
 
     }
     
@@ -254,4 +255,28 @@ extension PhotoAlbumViewController {
         }
     }
 
+}
+
+extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate {
+    
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+    }
+    
+    //notifies the receiver that and object has changed
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        
+        switch type {
+                case .insert:
+                     collectionView.insertItems(at: [newIndexPath!])
+                case .delete:
+                    collectionView.deleteItems(at: [indexPath!])
+                case .update:
+                    collectionView.reloadItems(at: [newIndexPath!])
+                case .move:
+                    collectionView.moveItem(at: indexPath!, to: newIndexPath!)
+              @unknown default:
+                fatalError("")
+          }
+    }
+    
 }
