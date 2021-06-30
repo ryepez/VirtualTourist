@@ -119,30 +119,26 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                 
             } else {
                 //delete images
-                if let index = fetchedResultsController.fetchedObjects?.indices {
-                         for i in index {
-                             let indexPath = IndexPath(row: i, section: 0)
-                             deleteFoto(at: indexPath)
-                         }
-                
+                if let objectToDelete = fetchedResultsController.fetchedObjects {
+                    
+                    for index in objectToDelete {
+                        dataController.viewContext.delete(index)
+                        try? dataController.viewContext.save()
+                    }
+                    
                     NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log), pageNumber).url) { (reponse, error) in
                     //saving the data to a object
                         DataModel.photoArray = reponse
+                        
                         //downloading fotos and saving them
                         for index in DataModel.photoArray.indices {
-                            NetworkRequests.imageRequest(url: URL(string: DataModel.photoArray[index].url_sq)!) { (image, error) in
-
-                                DispatchQueue.main.async { [self] in
-                                    let foto = Foto(context: self.dataController.viewContext)
-                                    foto.downloadDate = Date()
-                                    foto.imageToUse = image
-                                    foto.pin = self.pin
-                                    //saving the data
-                                    try? self.dataController.viewContext.save()
-                                 //   self.fetchDataAgain()
-                                 //   self.collectionView.reloadData()
-                                }
+                            
+                            guard let URLForImage =  URL(string: DataModel.photoArray[index].url_sq) else {
+                                return
                             }
+                            
+                            NetworkRequests.imageRequest(url: URLForImage, completionHandler: self.handleImageFileResponse(image:error:))
+                       
                         }
                     }
                 
@@ -154,13 +150,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     }
  
     }
-                
-    func deleteFoto(at indexPath: IndexPath) {
-        
-        let fotoToDelete = fetchedResultsController.object(at: indexPath)
-        dataController.viewContext.delete(fotoToDelete)
-        try? dataController.viewContext.save()
-    }
+            
                 
                 
     
