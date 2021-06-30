@@ -22,6 +22,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     var photos:Foto!
     //injecting the data source
     var dataController: DataController!
+    var blockOperation = BlockOperation()
+
     
     var fetchedResultsController: NSFetchedResultsController<Foto>!
 
@@ -258,25 +260,117 @@ extension PhotoAlbumViewController {
 }
 
 extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate {
-    
+    // methods to delete images by clicking on them.
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+     
+        blockOperation = BlockOperation()
+     
     }
     
-    //notifies the receiver that and object has changed
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
+    
+        let sectionIndexSet = IndexSet(integer: sectionIndex)
+   
         switch type {
-                case .insert:
-                     collectionView.insertItems(at: [newIndexPath!])
-                case .delete:
-                    collectionView.deleteItems(at: [indexPath!])
-                case .update:
-                    collectionView.reloadItems(at: [newIndexPath!])
-                case .move:
-                    collectionView.moveItem(at: indexPath!, to: newIndexPath!)
-              @unknown default:
-                fatalError("")
-          }
+    
+        case .insert:
+
+            blockOperation.addExecutionBlock {
+    
+                self.collectionView?.insertSections(sectionIndexSet)
+    
+            }
+    
+        case .delete:
+    
+            blockOperation.addExecutionBlock {
+                    
+                self.collectionView?.deleteSections(sectionIndexSet)
+    
+            }
+    
+        case .update:
+    
+            blockOperation.addExecutionBlock {
+    
+                self.collectionView?.reloadSections(sectionIndexSet)
+    
+            }
+    
+        case .move:
+    
+            assertionFailure()
+    
+            break
+    
+        @unknown default:
+            fatalError()
+        }
+    
+    }
+  
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+    
+        switch type {
+    
+        case .insert:
+    
+            guard let newIndexPath = newIndexPath else { break }
+   
+            blockOperation.addExecutionBlock {
+    
+                self.collectionView?.insertItems(at: [newIndexPath])
+    
+            }
+    
+        case .delete:
+    
+            guard let indexPath = indexPath else { break }
+    
+            
+    
+            blockOperation.addExecutionBlock {
+    
+                self.collectionView?.deleteItems(at: [indexPath])
+    
+            }
+    
+        case .update:
+    
+            guard let indexPath = indexPath else { break }
+    
+            
+    
+            blockOperation.addExecutionBlock {
+    
+                self.collectionView?.reloadItems(at: [indexPath])
+    
+            }
+    
+        case .move:
+    
+            guard let indexPath = indexPath, let newIndexPath = newIndexPath else { return }
+   
+            blockOperation.addExecutionBlock {
+    
+                self.collectionView?.moveItem(at: indexPath, to: newIndexPath)
+    
+            }
+    
+        @unknown default:
+            fatalError()
+        }
+    
+    }
+  
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+    
+        collectionView?.performBatchUpdates({
+    
+            self.blockOperation.start()
+    
+            }, completion: nil)
+    
     }
     
 }
