@@ -22,9 +22,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     var photos:Foto!
     //injecting the data source
     var dataController: DataController!
+    //variable to store block operation for deleting photos from collectionView
     var blockOperation = BlockOperation()
 
-    
+    //
     var fetchedResultsController: NSFetchedResultsController<Foto>!
 
     var pageNumber = String((arc4random() % 3) + 1)
@@ -62,7 +63,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         
         
         if let count = fetchedResultsController.fetchedObjects?.count {
-            
             if count == 0 {
                 //getting the URLS of the fotos
                 print("I am here")
@@ -108,10 +108,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         DataModel.photoArray = []
     }
     @IBAction func loadPictures(_ sender: UIButton) {
-
+        
         pageNumber = String((arc4random() % 3) + 1)
      
         if let count = fetchedResultsController.fetchedObjects?.count {
+            print("when loading \(count)")
             if count == 0 {
                 fetchDataAgain()
                 collectionView.reloadData()
@@ -138,8 +139,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                                     foto.pin = self.pin
                                     //saving the data
                                     try? self.dataController.viewContext.save()
-                                    self.fetchDataAgain()
-                                    self.collectionView.reloadData()
+                                 //   self.fetchDataAgain()
+                                 //   self.collectionView.reloadData()
                                 }
                             }
                         }
