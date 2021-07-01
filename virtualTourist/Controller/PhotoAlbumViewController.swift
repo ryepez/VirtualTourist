@@ -18,7 +18,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     @IBOutlet weak var mapView: MKMapView!
     
-    //setting the container for the data 
+    @IBOutlet weak var newColletionButton: UIButton!
+    
+    //setting the container for the data
     var pin: Pin!
     //injecting the data source
     var dataController: DataController!
@@ -164,16 +166,18 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     }
     
     
-    
-    
     // Method to show the activity indicatior
     
     func setLoggion(_ logingIP: Bool) {
         
         if logingIP {
             activityIndicator.startAnimating()
+            newColletionButton.isEnabled = !logingIP
+            
         } else {
             activityIndicator.stopAnimating()
+            newColletionButton.isEnabled = true
+
         }
         
     }

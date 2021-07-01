@@ -45,12 +45,6 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
         
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        //fetchedResultsController = nil
-        
-    }
     override func viewWillAppear(_ animated: Bool) {
         //hidding the navigation controller
         navigationController?.setNavigationBarHidden(true, animated: false)
@@ -121,8 +115,6 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
     
     
     
-    
-    
     @objc func longToDrop(sender: UIGestureRecognizer){
         if sender.state == .ended {
             
@@ -135,22 +127,6 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
         
     }
     
-    //helper method to load the user last map that user was looking at
-    fileprivate func setupLastMapLocation() {
-        let isSliderSet = UserDefaults.standard.bool(forKey: "lastMapLocation")
-        
-        if isSliderSet {
-            if let latitude = UserDefaults.standard.value(forKey: "lastMapLocationLatitude"), let longitude = UserDefaults.standard.value(forKey: "lastMapLocationLongitude"), let latitudeDelta = UserDefaults.standard.value(forKey: "latitudeDelta"), let longitudeDelta = UserDefaults.standard.value(forKey: "longitudeDelta") {
-                
-                let initialLocation = CLLocation(latitude: latitude as! CLLocationDegrees, longitude: longitude as! CLLocationDegrees)
-                
-                self.centerMapOnLocation(location: initialLocation, latitudeDelta: latitudeDelta as! Double, longitudeDelta: longitudeDelta as! Double)
-            }
-            
-        } else {
-            UserDefaults.standard.set(true, forKey: "lastMapLocation")
-        }
-    }
     
     // this method controls the look of the pins and displays the data in a better format
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
@@ -164,7 +140,6 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
             pinView!.canShowCallout = true
             pinView!.pinTintColor = .red
             pinView!.animatesDrop = true
-            pinView!.isDraggable = true
             
             pinView!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
             pinView!.leftCalloutAccessoryView = UIButton(type: .close)
@@ -243,6 +218,25 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
 
 extension TraveLocationMapController: MKMapViewDelegate {
     
+    //helper method to load the user last map that user was looking at
+    func setupLastMapLocation() {
+        let isSliderSet = UserDefaults.standard.bool(forKey: "lastMapLocation")
+        
+        if isSliderSet {
+            if let latitude = UserDefaults.standard.value(forKey: "lastMapLocationLatitude"), let longitude = UserDefaults.standard.value(forKey: "lastMapLocationLongitude"), let latitudeDelta = UserDefaults.standard.value(forKey: "latitudeDelta"), let longitudeDelta = UserDefaults.standard.value(forKey: "longitudeDelta") {
+                
+                let initialLocation = CLLocation(latitude: latitude as! CLLocationDegrees, longitude: longitude as! CLLocationDegrees)
+                
+                self.centerMapOnLocation(location: initialLocation, latitudeDelta: latitudeDelta as! Double, longitudeDelta: longitudeDelta as! Double)
+            }
+            
+        } else {
+            UserDefaults.standard.set(true, forKey: "lastMapLocation")
+        }
+    }
+    
+    
+    // helper method to center the when users the app.
     func centerMapOnLocation(location: CLLocation, latitudeDelta: Double, longitudeDelta: Double) {
         let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta))
         
