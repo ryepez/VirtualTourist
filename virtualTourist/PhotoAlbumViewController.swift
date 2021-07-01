@@ -29,6 +29,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     var fetchedResultsController: NSFetchedResultsController<Foto>!
 
     var pageNumber = String((arc4random() % 3) + 1)
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,9 +55,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         
         navigationController?.setNavigationBarHidden(false, animated: true)
         // do this later to add the hold touch to delete picture
-       
-        
-    
         
         settingUpOriginalLocation()
         settiUpFetchResults()
@@ -65,27 +63,17 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         if let count = fetchedResultsController.fetchedObjects?.count {
             if count == 0 {
                 //getting the URLS of the fotos
-                print("I am here")
-                NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log), pageNumber).url) { (reponse, error) in
-                //saving the data to a object
-                    DataModel.photoArray = reponse
-                    //downloading fotos and saving them
-                    for index in DataModel.photoArray.indices {
-                        
-                        guard let URLForImage =  URL(string: DataModel.photoArray[index].url_sq) else {
-                            return
-                        }
-                       
-                        NetworkRequests.imageRequest(url: URLForImage, completionHandler: self.handleImageFileResponse(image:error:))
-                    }
-                }
+                gettingImagesToLoad()
                              
-                
             } else {
                 collectionView.reloadData()
             }
         }
         
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        DataModel.photoArray = []
     }
     
     func handleImageFileResponse(image: Data?, error: Error?) {
@@ -103,10 +91,34 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         
     }
     
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        DataModel.photoArray = []
+    fileprivate func gettingImagesToLoad() {
+        
+        //requesting the URLs of the image of one mile radius of these lat and log.
+        NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log), pageNumber).url) { (reponse, error) in
+            
+            if reponse.count != 0 {
+
+            //saving the data to a object
+            DataModel.photoArray = reponse
+            
+            //loop that go over all the urls to get the images
+            for index in DataModel.photoArray.indices {
+                
+                //checking the string can be a url
+                guard let URLForImage =  URL(string: DataModel.photoArray[index].url_sq) else {
+                    return
+                }
+                //getting all the image and saving them
+                NetworkRequests.imageRequest(url: URLForImage, completionHandler: self.handleImageFileResponse(image:error:))
+            }
+            } else {
+                self.showAlert(alertText: "No images for this location", alertMessage: "Please select a new location")
+            }
+            
+        }
     }
+    
+   
     @IBAction func loadPictures(_ sender: UIButton) {
         
         pageNumber = String((arc4random() % 3) + 1)
@@ -114,33 +126,18 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         if let count = fetchedResultsController.fetchedObjects?.count {
             print("when loading \(count)")
             if count == 0 {
-                fetchDataAgain()
-                collectionView.reloadData()
+                //when there are not images we show a alert message
+                self.showAlert(alertText: "No images for this location", alertMessage: "Please select a new location")
                 
             } else {
                 //delete images
                 if let objectToDelete = fetchedResultsController.fetchedObjects {
-                    
                     for index in objectToDelete {
                         dataController.viewContext.delete(index)
                         try? dataController.viewContext.save()
                     }
                     
-                    NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log), pageNumber).url) { (reponse, error) in
-                    //saving the data to a object
-                        DataModel.photoArray = reponse
-                        
-                        //downloading fotos and saving them
-                        for index in DataModel.photoArray.indices {
-                            
-                            guard let URLForImage =  URL(string: DataModel.photoArray[index].url_sq) else {
-                                return
-                            }
-                            
-                            NetworkRequests.imageRequest(url: URLForImage, completionHandler: self.handleImageFileResponse(image:error:))
-                       
-                        }
-                    }
+                    gettingImagesToLoad()
                 
                 }
                 
@@ -189,8 +186,18 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     }
     
     
+    fileprivate func fetchDataAgain() {
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            fatalError("The fetch could not be performed: \(error.localizedDescription )")
+        }
+    }
+    
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-     print("You have delete this picture!")
+        
+        print("You have delete this picture!")
     
         let pictureToBeDeleted = fetchedResultsController.object(at: indexPath)
         
@@ -204,17 +211,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         return fetchedResultsController.sections?[section].numberOfObjects ?? 0
         }
      
-   
-    
-    fileprivate func fetchDataAgain() {
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            fatalError("The fetch could not be performed: \(error.localizedDescription )")
-        }
-    }
-    
-    
     
      func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
          
