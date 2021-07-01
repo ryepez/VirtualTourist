@@ -68,15 +68,17 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     func handleImageFileResponse(image: Data?, error: Error?) {
         
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
             
-            let foto = Foto(context: self.dataController.viewContext)
+            guard let strongSelf = self else { return }
+            
+            let foto = Foto(context: strongSelf.dataController.viewContext)
             foto.downloadDate = Date()
             foto.imageToUse = image
-            foto.pin = self.pin
+            foto.pin = strongSelf.pin
             
             //saving the data
-            try? self.dataController.viewContext.save()
+            try? strongSelf.dataController.viewContext.save()
         }
         
     }
@@ -87,8 +89,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         setLoggion(true)
         
         //requesting the URLs of the image of one mile radius of these lat and log.
-        NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log), pageNumber).url) { (reponse, error) in
+        NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log), pageNumber).url) { [weak self] (reponse, error) in
             
+            
+            guard let strongSelf = self else { return }
+
             if reponse.count != 0 {
                 
                 //saving the data to a object
@@ -102,15 +107,15 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                         return
                     }
                     //getting all the image and saving them
-                    NetworkRequests.imageRequest(url: URLForImage, completionHandler: self.handleImageFileResponse(image:error:))
+                    NetworkRequests.imageRequest(url: URLForImage, completionHandler: strongSelf.handleImageFileResponse(image:error:))
                     
                     //make activity animation to false
-                    self.setLoggion(false)
+                    strongSelf.setLoggion(false)
                 }
             } else {
                 //make activity animation to false
-                self.showAlert(alertText: "No images for this location", alertMessage: "Please select a new location")
-                self.setLoggion(false)
+                strongSelf.showAlert(alertText: "No images for this location", alertMessage: "Please select a new location")
+                strongSelf.setLoggion(false)
             }
             
         }
@@ -275,25 +280,25 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate {
         
         case .insert:
             
-            blockOperation.addExecutionBlock {
+            blockOperation.addExecutionBlock { [weak self] in
                 
-                self.collectionView?.insertSections(sectionIndexSet)
+                self?.collectionView?.insertSections(sectionIndexSet)
                 
             }
             
         case .delete:
             
-            blockOperation.addExecutionBlock {
+            blockOperation.addExecutionBlock { [weak self] in
                 
-                self.collectionView?.deleteSections(sectionIndexSet)
+                self?.collectionView?.deleteSections(sectionIndexSet)
                 
             }
             
         case .update:
             
-            blockOperation.addExecutionBlock {
+            blockOperation.addExecutionBlock { [weak self] in
                 
-                self.collectionView?.reloadSections(sectionIndexSet)
+                self?.collectionView?.reloadSections(sectionIndexSet)
                 
             }
             
@@ -317,9 +322,9 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate {
             
             guard let newIndexPath = newIndexPath else { break }
             
-            blockOperation.addExecutionBlock {
+            blockOperation.addExecutionBlock { [weak self] in
                 
-                self.collectionView?.insertItems(at: [newIndexPath])
+                self?.collectionView?.insertItems(at: [newIndexPath])
                 
             }
             
@@ -329,12 +334,10 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate {
             
             
             
-            blockOperation.addExecutionBlock {
+            blockOperation.addExecutionBlock { [weak self] in
                 
-                DispatchQueue.main.async {
-                    self.collectionView?.deleteItems(at: [indexPath])
+                self?.collectionView?.deleteItems(at: [indexPath])
 
-                }
                 
             }
             
@@ -344,9 +347,9 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate {
             
             
             
-            blockOperation.addExecutionBlock {
+            blockOperation.addExecutionBlock { [weak self] in
                 
-                self.collectionView?.reloadItems(at: [indexPath])
+                self?.collectionView?.reloadItems(at: [indexPath])
                 
             }
             
@@ -354,9 +357,9 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate {
             
             guard let indexPath = indexPath, let newIndexPath = newIndexPath else { return }
             
-            blockOperation.addExecutionBlock {
+            blockOperation.addExecutionBlock { [weak self] in
                 
-                self.collectionView?.moveItem(at: indexPath, to: newIndexPath)
+                self?.collectionView?.moveItem(at: indexPath, to: newIndexPath)
                 
             }
             
@@ -368,9 +371,9 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate {
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         
-        collectionView?.performBatchUpdates({
+        collectionView?.performBatchUpdates({ [weak self] in
             
-            self.blockOperation.start()
+            self?.blockOperation.start()
             
         }, completion: nil)
         
