@@ -112,19 +112,35 @@
 		F6870A0E267AAB050066D00B /* virtualTourist */ = {
 			isa = PBXGroup;
 			children = (
+				F6870A1D267AAB070066D00B /* Info.plist */,
 				F6870A0F267AAB050066D00B /* AppDelegate.swift */,
-				F666E1D5267E60C000F89A4F /* Model */,
 				F6870A11267AAB050066D00B /* SceneDelegate.swift */,
-				F6870A13267AAB050066D00B /* TraveLocationMapController.swift */,
+				F69A7A58268D47A900D59BA6 /* Assets */,
+				F666E1D5267E60C000F89A4F /* Model */,
+				F69A7A59268D483800D59BA6 /* Controller */,
+			);
+			path = virtualTourist;
+			sourceTree = "<group>";
+		};
+		F69A7A58268D47A900D59BA6 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
 				F6870A15267AAB050066D00B /* Main.storyboard */,
+				F6870A18267AAB070066D00B /* Assets.xcassets */,
+				F6870A1A267AAB070066D00B /* LaunchScreen.storyboard */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
+		F69A7A59268D483800D59BA6 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				F6870A13267AAB050066D00B /* TraveLocationMapController.swift */,
 				F666E1CE267D42B700F89A4F /* PhotoAlbumViewController.swift */,
 				F69A7A54268D334200D59BA6 /* HelperMethodForAlert.swift */,
 				F6C78D03267E9C7F003E38DE /* CollectionViewCell.swift */,
-				F6870A18267AAB070066D00B /* Assets.xcassets */,
-				F6870A1A267AAB070066D00B /* LaunchScreen.storyboard */,
-				F6870A1D267AAB070066D00B /* Info.plist */,
 			);
-			path = virtualTourist;
+			path = Controller;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

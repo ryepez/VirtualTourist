@@ -10,31 +10,31 @@ import MapKit
 import CoreData
 
 class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-   
-  
+    
+    
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
-@IBOutlet weak var collectionView: UICollectionView!
-@IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
-@IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
+    @IBOutlet weak var mapView: MKMapView!
     
     //setting the container for the data 
     var pin: Pin!
-    var photos:Foto!
     //injecting the data source
     var dataController: DataController!
     //variable to store block operation for deleting photos from collectionView
     var blockOperation = BlockOperation()
-
-    //
+    
+    // the fectch results
     var fetchedResultsController: NSFetchedResultsController<Foto>!
-
+    
+    //variable to store random number
     var pageNumber = String((arc4random() % 3) + 1)
-
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // makes the collection view looks nice with 3 columns
         let space: CGFloat = 3.0
         let dimension = (view.frame.size.width - (2*space)) / 3.0
@@ -90,23 +90,23 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log), pageNumber).url) { (reponse, error) in
             
             if reponse.count != 0 {
-
-            //saving the data to a object
-            DataModel.photoArray = reponse
-            
-            //loop that go over all the urls to get the images
-            for index in DataModel.photoArray.indices {
                 
-                //checking the string can be a url
-                guard let URLForImage =  URL(string: DataModel.photoArray[index].url_sq) else {
-                    return
+                //saving the data to a object
+                DataModel.photoArray = reponse
+                
+                //loop that go over all the urls to get the images
+                for index in DataModel.photoArray.indices {
+                    
+                    //checking the string can be a url
+                    guard let URLForImage =  URL(string: DataModel.photoArray[index].url_sq) else {
+                        return
+                    }
+                    //getting all the image and saving them
+                    NetworkRequests.imageRequest(url: URLForImage, completionHandler: self.handleImageFileResponse(image:error:))
+                    
+                    //make activity animation to false
+                    self.setLoggion(false)
                 }
-                //getting all the image and saving them
-                NetworkRequests.imageRequest(url: URLForImage, completionHandler: self.handleImageFileResponse(image:error:))
-                
-                //make activity animation to false
-                self.setLoggion(false)
-            }
             } else {
                 //make activity animation to false
                 self.showAlert(alertText: "No images for this location", alertMessage: "Please select a new location")
@@ -116,11 +116,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         }
     }
     
-   
+    
     @IBAction func loadPictures(_ sender: UIButton) {
         
         pageNumber = String((arc4random() % 3) + 1)
-     
+        
         if let count = fetchedResultsController.fetchedObjects?.count {
             print("when loading \(count)")
             if count == 0 {
@@ -129,6 +129,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                 
             } else {
                 //delete images
+                
+                
                 if let objectToDelete = fetchedResultsController.fetchedObjects {
                     for index in objectToDelete {
                         dataController.viewContext.delete(index)
@@ -136,17 +138,19 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                     }
                     
                     gettingImagesToLoad()
-                
+                    
                 }
                 
-                    
+                
                 
             }
+        }
+        
     }
- 
-    }
-            
-                
+    
+    
+    
+    
     // Method to show the activity indicatior
     
     func setLoggion(_ logingIP: Bool) {
@@ -207,35 +211,35 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         print("You have delete this picture!")
-    
+        
         let pictureToBeDeleted = fetchedResultsController.object(at: indexPath)
         
         dataController.viewContext.delete(pictureToBeDeleted)
-
+        
     }
     
     
-     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
         return fetchedResultsController.sections?[section].numberOfObjects ?? 0
-        }
-     
+    }
     
-     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-         
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
         
-            cell.imageView?.image = UIImage(data: fetchedResultsController.object(at: indexPath).imageToUse!)
-       
-    
+        cell.imageView?.image = UIImage(data: fetchedResultsController.object(at: indexPath).imageToUse!)
+        
+        
         return cell
-     }
-     
-  
-  
+    }
     
- 
+    
+    
+    
+    
 }
 //center map with location send from the previous scene
 extension PhotoAlbumViewController {
@@ -249,124 +253,127 @@ extension PhotoAlbumViewController {
             longitudinalMeters: regionRadius)
         DispatchQueue.main.async {
             self.mapView.setRegion(coordinateRegion, animated: true)
-
+            
         }
     }
-
+    
 }
 
 extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate {
     // methods to delete images by clicking on them.
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-     
+        
         blockOperation = BlockOperation()
-     
+        
     }
     
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
-    
+        
         let sectionIndexSet = IndexSet(integer: sectionIndex)
-   
+        
         switch type {
-    
+        
         case .insert:
-
+            
             blockOperation.addExecutionBlock {
-    
+                
                 self.collectionView?.insertSections(sectionIndexSet)
-    
+                
             }
-    
+            
         case .delete:
-    
+            
             blockOperation.addExecutionBlock {
-                    
+                
                 self.collectionView?.deleteSections(sectionIndexSet)
-    
+                
             }
-    
+            
         case .update:
-    
+            
             blockOperation.addExecutionBlock {
-    
+                
                 self.collectionView?.reloadSections(sectionIndexSet)
-    
+                
             }
-    
+            
         case .move:
-    
+            
             assertionFailure()
-    
+            
             break
-    
+            
         @unknown default:
             fatalError()
         }
-    
+        
     }
-  
+    
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-    
+        
         switch type {
-    
+        
         case .insert:
-    
+            
             guard let newIndexPath = newIndexPath else { break }
-   
+            
             blockOperation.addExecutionBlock {
-    
+                
                 self.collectionView?.insertItems(at: [newIndexPath])
-    
+                
             }
-    
+            
         case .delete:
-    
-            guard let indexPath = indexPath else { break }
-    
             
-    
+            guard let indexPath = indexPath else { break }
+            
+            
+            
             blockOperation.addExecutionBlock {
-    
-                self.collectionView?.deleteItems(at: [indexPath])
-    
+                
+                DispatchQueue.main.async {
+                    self.collectionView?.deleteItems(at: [indexPath])
+
+                }
+                
             }
-    
+            
         case .update:
-    
-            guard let indexPath = indexPath else { break }
-    
             
-    
+            guard let indexPath = indexPath else { break }
+            
+            
+            
             blockOperation.addExecutionBlock {
-    
+                
                 self.collectionView?.reloadItems(at: [indexPath])
-    
+                
             }
-    
+            
         case .move:
-    
+            
             guard let indexPath = indexPath, let newIndexPath = newIndexPath else { return }
-   
+            
             blockOperation.addExecutionBlock {
-    
+                
                 self.collectionView?.moveItem(at: indexPath, to: newIndexPath)
-    
+                
             }
-    
+            
         @unknown default:
             fatalError()
         }
-    
+        
     }
-  
+    
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-    
+        
         collectionView?.performBatchUpdates({
-    
+            
             self.blockOperation.start()
-    
-            }, completion: nil)
-    
+            
+        }, completion: nil)
+        
     }
     
 }

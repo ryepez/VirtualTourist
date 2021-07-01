@@ -11,26 +11,23 @@ import CoreData
 
 class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDelegate {
     
- 
+    
     
     @IBOutlet weak var mapView: MKMapView!
     
-    // the pins who photos are being displayed
-   // var pins: [Pin] = []
-  //  var photos:[Foto] = []
 
-    //maybe I dont need this here check later
-    
+    //Data injection
     var dataController: DataController!
+    //pin to store data
     var fetchedResultsController: NSFetchedResultsController<Pin>!
     
-   
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         //setting the map delegate
         mapView.delegate = self
-
+        
         //hidding the navigation controller
         navigationController?.setNavigationBarHidden(true, animated: false)
         
@@ -42,7 +39,7 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
         let dropPin = UILongPressGestureRecognizer(target: self, action: #selector(longToDrop))
         mapView.addGestureRecognizer(dropPin)
         
-
+        
         setUpFetchedResultsController()
         
         
@@ -52,7 +49,7 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
         super.viewWillDisappear(animated)
         
         //fetchedResultsController = nil
-    
+        
     }
     override func viewWillAppear(_ animated: Bool) {
         //hidding the navigation controller
@@ -60,10 +57,9 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
     }
     
     
-
+    
     func addAnnotation(location: CLLocationCoordinate2D){
-            
-      
+        
         let annotation = MKPointAnnotation()
         annotation.coordinate = location
         annotation.title = "Photos"
@@ -75,9 +71,9 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
         pin.log = annotation.coordinate.longitude
         //saving the data
         try? dataController.viewContext.save()
-
+        
         mapView.addAnnotation(annotation)
-
+        
         fetchDataAgain()
         
     }
@@ -108,18 +104,18 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
         }
         
         for index in fetchedResultsController.fetchedObjects! {
-                 let annotation = MKPointAnnotation()
-                 let location = CLLocationCoordinate2D(latitude: index.lat, longitude: index.log)
-                 annotation.coordinate = location
-                 annotation.title = "Photos"
-                 self.mapView.addAnnotation(annotation)
-
-             }
+            let annotation = MKPointAnnotation()
+            let location = CLLocationCoordinate2D(latitude: index.lat, longitude: index.log)
+            annotation.coordinate = location
+            annotation.title = "Photos"
+            self.mapView.addAnnotation(annotation)
+            
+        }
     }
     
-  
-        
-        
+    
+    
+    
     
     @objc func longToDrop(sender: UIGestureRecognizer){
         if sender.state == .ended {
@@ -132,7 +128,7 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
         
         
     }
-
+    
     //helper method to load the user last map that user was looking at
     fileprivate func setupLastMapLocation() {
         let isSliderSet = UserDefaults.standard.bool(forKey: "lastMapLocation")
@@ -162,8 +158,8 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
             pinView!.canShowCallout = true
             pinView!.pinTintColor = .red
             pinView!.animatesDrop = true
-          //  pinView!.isDraggable = true
-
+            pinView!.isDraggable = true
+            
             pinView!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
             pinView!.leftCalloutAccessoryView = UIButton(type: .close)
         }
@@ -174,16 +170,17 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
         return pinView
     }
     
-
+    
     // Method does the segue when user taps the pin
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        
         if control == view.rightCalloutAccessoryView {
-        performSegue(withIdentifier: "photoAlbumViewController", sender: self)
+            performSegue(withIdentifier: "photoAlbumViewController", sender: self)
         }
         
+    
         if control == view.leftCalloutAccessoryView {
-       
-        //deleting the pin from the array
+            //deleting the pin from the array
             if let pins = fetchedResultsController.fetchedObjects {
                 //selected pin at that moment
                 let annotation = mapView.selectedAnnotations[0]
@@ -194,17 +191,18 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
                 }) else {
                     return
                 }
+                
                 //getting pip to be deleted
                 let pinToDelete = pins[indexPath]
                 dataController.viewContext.delete(pinToDelete)
             }
-        //saving those changes
-        try? dataController.viewContext.save()
-        //deleting the pin from the UI
-        mapView.removeAnnotation(mapView.selectedAnnotations[0])
+            //saving those changes
+            try? dataController.viewContext.save()
+            //deleting the pin from the UI
+            mapView.removeAnnotation(mapView.selectedAnnotations[0])
         }
         
-      
+        
     }
     
     
@@ -221,27 +219,27 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
                     return
                 }
                 vc.pin = pins[indexPath]
-            vc.dataController = dataController
+                vc.dataController = dataController
+            }
+            
         }
-
+        
+        
     }
     
-   
-}
-
 }
 
 
 extension TraveLocationMapController: MKMapViewDelegate {
-
+    
     func centerMapOnLocation(location: CLLocation, latitudeDelta: Double, longitudeDelta: Double) {
-       let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta))
+        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta))
         
         DispatchQueue.main.async {
-           self.mapView.setRegion(region, animated: true)
-       }
+            self.mapView.setRegion(region, animated: true)
+        }
         
-   }
+    }
     
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         //storing the latitude and longitude of the center of the map when it moves
@@ -251,15 +249,15 @@ extension TraveLocationMapController: MKMapViewDelegate {
         //storing these values for getting the correct zoom to restruct the map for the user after the close the app.
         let latitudeDeltaZoom = mapView.region.span.latitudeDelta
         let longitudeDeltaDeltaZoom = mapView.region.span.longitudeDelta
-
+        
         //setting the values of map everytime that the map moves
         UserDefaults.standard.set(mapLatitude, forKey: "lastMapLocationLatitude")
         UserDefaults.standard.set(mapLongitude, forKey: "lastMapLocationLongitude")
         UserDefaults.standard.set(latitudeDeltaZoom, forKey: "latitudeDelta")
         UserDefaults.standard.set(longitudeDeltaDeltaZoom, forKey: "longitudeDelta")
-            
+        
     }
-
+    
 }
 
 
