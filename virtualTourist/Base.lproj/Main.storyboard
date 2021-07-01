@@ -84,6 +84,10 @@
                                             <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                             <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                         </collectionViewFlowLayout>
+                                        <activityIndicatorView key="backgroundView" hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="large" id="OmI-8i-QSk">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="373.5"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        </activityIndicatorView>
                                         <cells>
                                             <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="CollectionViewCell" id="6vs-RX-xjW" customClass="CollectionViewCell" customModule="virtualTourist" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="0.0" width="124" height="117"/>
@@ -141,6 +145,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="jmT-k9-od7"/>
                     <connections>
+                        <outlet property="activityIndicator" destination="OmI-8i-QSk" id="zBH-Ks-AhX"/>
                         <outlet property="collectionView" destination="V6f-QN-Ns8" id="fDW-4A-NXq"/>
                         <outlet property="flowLayout" destination="T2s-dx-ayA" id="lOP-46-zTY"/>
                         <outlet property="mapView" destination="toC-0N-cD3" id="ptX-JH-xro"/>

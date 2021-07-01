@@ -12,7 +12,8 @@ import CoreData
 class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
    
   
-
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    
 @IBOutlet weak var collectionView: UICollectionView!
 @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
 @IBOutlet weak var mapView: MKMapView!
@@ -33,16 +34,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        //delegates and data sources
-        //collectionView.delegate = self
-        //collectionView.dataSource = self
-        
-        //collectionView.allowsSelection = true
-        //collectionView.isUserInteractionEnabled = true
 
-
-        
         // makes the collection view looks nice with 3 columns
         let space: CGFloat = 3.0
         let dimension = (view.frame.size.width - (2*space)) / 3.0
@@ -64,11 +56,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
             if count == 0 {
                 //getting the URLS of the fotos
                 gettingImagesToLoad()
-                             
-            } else {
-                collectionView.reloadData()
             }
         }
+        
         
     }
     
@@ -93,6 +83,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     fileprivate func gettingImagesToLoad() {
         
+        //make activity animation to true
+        setLoggion(true)
+        
         //requesting the URLs of the image of one mile radius of these lat and log.
         NetworkRequests.getFotoLocation(url: NetworkRequests.Endpoints.getPictureOneMileRadius(String(pin.lat), String(pin.log), pageNumber).url) { (reponse, error) in
             
@@ -110,9 +103,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                 }
                 //getting all the image and saving them
                 NetworkRequests.imageRequest(url: URLForImage, completionHandler: self.handleImageFileResponse(image:error:))
+                
+                //make activity animation to false
+                self.setLoggion(false)
             }
             } else {
+                //make activity animation to false
                 self.showAlert(alertText: "No images for this location", alertMessage: "Please select a new location")
+                self.setLoggion(false)
             }
             
         }
@@ -149,7 +147,18 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     }
             
                 
-                
+    // Method to show the activity indicatior
+    
+    func setLoggion(_ logingIP: Bool) {
+        
+        if logingIP {
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.stopAnimating()
+        }
+        
+    }
+    
     
     fileprivate func settingUpOriginalLocation() {
         //setting the initial location
