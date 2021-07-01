@@ -69,8 +69,14 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
         pin.creationDate = Date()
         pin.lat = annotation.coordinate.latitude
         pin.log = annotation.coordinate.longitude
+        
         //saving the data
-        try? dataController.viewContext.save()
+        
+        do {
+            try dataController.viewContext.save()
+        } catch {
+          showAlert(alertText: "Data could not be save", alertMessage: "Please try again.")
+        }
         
         mapView.addAnnotation(annotation)
         
@@ -197,7 +203,12 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
                 dataController.viewContext.delete(pinToDelete)
             }
             //saving those changes
-            try? dataController.viewContext.save()
+            do {
+                try dataController.viewContext.save()
+            } catch {
+              showAlert(alertText: "Data could not be save", alertMessage: "Please try again.")
+            }
+            
             //deleting the pin from the UI
             mapView.removeAnnotation(mapView.selectedAnnotations[0])
         }

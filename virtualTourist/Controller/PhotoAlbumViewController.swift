@@ -78,7 +78,13 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
             foto.pin = strongSelf.pin
             
             //saving the data
-            try? strongSelf.dataController.viewContext.save()
+            
+            do {
+                try strongSelf.dataController.viewContext.save()
+            } catch {
+                strongSelf.showAlert(alertText: "Data could not be save", alertMessage: "Please try again.")
+            }
+            
         }
         
     }
@@ -139,7 +145,11 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                 if let objectToDelete = fetchedResultsController.fetchedObjects {
                     for index in objectToDelete {
                         dataController.viewContext.delete(index)
-                        try? dataController.viewContext.save()
+                        do {
+                            try dataController.viewContext.save()
+                        } catch {
+                            showAlert(alertText: "Data could not be save", alertMessage: "Please try again.")
+                        }
                     }
                     
                     gettingImagesToLoad()
