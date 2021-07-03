@@ -46,6 +46,8 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
         //hidding the navigation controller
         navigationController?.setNavigationBarHidden(true, animated: false)
     }

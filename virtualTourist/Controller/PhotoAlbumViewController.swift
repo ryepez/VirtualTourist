@@ -33,6 +33,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     //variable to store random number
     var pageNumber = String((arc4random() % 3) + 1)
     
+    //URL image array
+    
+    var URLForImageArray: [URL] = []
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,6 +69,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     }
     
     override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+    
         DataModel.photoArray = []
     }
     
@@ -91,6 +97,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         
     }
     
+    
+    
     fileprivate func gettingImagesToLoad() {
         
         //make activity animation to true
@@ -114,8 +122,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                     guard let URLForImage =  URL(string: DataModel.photoArray[index].url_sq) else {
                         return
                     }
-                    //getting all the image and saving them
-                    NetworkRequests.imageRequest(url: URLForImage, completionHandler: strongSelf.handleImageFileResponse(image:error:))
+                    strongSelf.URLForImageArray.append(URLForImage)
+                    
+                    //creating a pin with no picture
+                    strongSelf.handleImageFile()
+                    
+                    //NetworkRequests.imageRequest(url: URLForImage, completionHandler: strongSelf.handleImageFileResponse(image:error:))
                     
                     //make activity animation to false
                     strongSelf.setLoggion(false)
@@ -128,6 +140,30 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
             
         }
     }
+    
+    func handleImageFile() {
+        
+        DispatchQueue.main.async { [weak self] in
+            
+            guard let strongSelf = self else { return }
+            
+            let foto = Foto(context: strongSelf.dataController.viewContext)
+            foto.downloadDate = Date()
+            foto.pin = strongSelf.pin
+            foto.imageToUse = nil
+            
+            //saving the data
+            
+            do {
+                try strongSelf.dataController.viewContext.save()
+            } catch {
+                strongSelf.showAlert(alertText: "Data could not be save", alertMessage: "Please try again.")
+            }
+            
+        }
+        
+    }
+    
     
     
     @IBAction func loadPictures(_ sender: UIButton) {
@@ -246,13 +282,32 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
-        
-        cell.imageView?.image = UIImage(data: fetchedResultsController.object(at: indexPath).imageToUse!)
-        
+    
+        cell.imageView.image = UIImage(systemName: "cloud")
+                DispatchQueue.global(qos: .background).async { [self] in
+                    
+                    for urlOfImage in self.URLForImageArray {
+                    NetworkRequests.imageRequest(url:urlOfImage) { (data, error) in
+                        
+                        DispatchQueue.main.async {
+                            
+                           let foto = Foto(context: dataController.viewContext)
+                            foto.imageToUse = data
+
+                            cell.imageView?.image = UIImage(data: self.fetchedResultsController.object(at: indexPath).imageToUse!)
+                            
+                        }
+                   
+                    }
+
+                }
+            
+             
+        }
         
         return cell
+        
     }
     
     
