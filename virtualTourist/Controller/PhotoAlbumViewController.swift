@@ -124,14 +124,16 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                     }
                     strongSelf.URLForImageArray.append(URLForImage)
                     
-                    //creating a pin with no picture
-                    strongSelf.handleImageFile()
-                    
-                    //NetworkRequests.imageRequest(url: URLForImage, completionHandler: strongSelf.handleImageFileResponse(image:error:))
+                }
+                
+                    for photo in DataModel.photoArray {
+                        //cereating a pin with no picture
+                        strongSelf.handleImageFile(urlForImage: photo.url_sq)
+                    }
                     
                     //make activity animation to false
                     strongSelf.setLoggion(false)
-                }
+                
             } else {
                 //make activity animation to false
                 strongSelf.showAlert(alertText: "No images for this location", alertMessage: "Please select a new location")
@@ -141,13 +143,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         }
     }
     
-    func handleImageFile() {
+    func handleImageFile(urlForImage: String) {
         
         DispatchQueue.main.async { [weak self] in
             
             guard let strongSelf = self else { return }
             
             let foto = Foto(context: strongSelf.dataController.viewContext)
+            foto.url = urlForImage
             foto.downloadDate = Date()
             foto.pin = strongSelf.pin
             foto.imageToUse = nil
@@ -285,26 +288,43 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
     
         cell.imageView.image = UIImage(systemName: "cloud")
-                DispatchQueue.global(qos: .background).async { [self] in
+        
+        let photo = self.fetchedResultsController.object(at: indexPath)
+        let photoURLString = photo.url
+        let photoURL = URL(string: photoURLString ?? "")
+        
+    
+        if
+                photo.imageToUse == nil,
+                let photoURL = photoURL
+     
+        {
+                DispatchQueue.global(qos: .background).async { [weak self, photoURL]  in
                     
-                    for urlOfImage in self.URLForImageArray {
-                    NetworkRequests.imageRequest(url:urlOfImage) { (data, error) in
+                    NetworkRequests.imageRequest(url: photoURL) { (data, error) in
                         
                         DispatchQueue.main.async {
+                            photo.imageToUse = data
                             
-                           let foto = Foto(context: dataController.viewContext)
-                            foto.imageToUse = data
-
-                            cell.imageView?.image = UIImage(data: self.fetchedResultsController.object(at: indexPath).imageToUse!)
+                            try? self?.dataController.viewContext.save()
+                            
+                            if let data = data {
+                                let uImage = UIImage(data: data)
+                                cell.imageView.image = uImage
+                            }
                             
                         }
-                   
+                       
                     }
-
                 }
-            
-             
         }
+        else {
+            if let image = photo.imageToUse {
+                let uiImage = UIImage(data: image)
+                cell.imageView?.image = uiImage
+        }
+                    }
+                    
         
         return cell
         
@@ -410,17 +430,6 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate {
                 
             }
             
-        case .update:
-            
-            guard let indexPath = indexPath else { break }
-            
-            
-            
-            blockOperation.addExecutionBlock { [weak self] in
-                
-                self?.collectionView?.reloadItems(at: [indexPath])
-                
-            }
             
         case .move:
             
@@ -432,8 +441,8 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate {
                 
             }
             
-        @unknown default:
-            fatalError()
+        @unknown default: break
+
         }
         
     }
