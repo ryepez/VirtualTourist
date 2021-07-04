@@ -15,7 +15,7 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
     
     @IBOutlet weak var mapView: MKMapView!
     
-
+    
     //Data injection
     var dataController: DataController!
     //pin to store data
@@ -71,7 +71,7 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
         do {
             try dataController.viewContext.save()
         } catch {
-          showAlert(alertText: "Data could not be save", alertMessage: "Please try again.")
+            showAlert(alertText: "Data could not be save", alertMessage: "Please try again.")
         }
         
         mapView.addAnnotation(annotation)
@@ -161,7 +161,7 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
             performSegue(withIdentifier: "photoAlbumViewController", sender: self)
         }
         
-    
+        
         if control == view.leftCalloutAccessoryView {
             //deleting the pin from the array
             if let pins = fetchedResultsController.fetchedObjects {
@@ -183,7 +183,7 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
             do {
                 try dataController.viewContext.save()
             } catch {
-              showAlert(alertText: "Data could not be save", alertMessage: "Please try again.")
+                showAlert(alertText: "Data could not be save", alertMessage: "Please try again.")
             }
             
             //deleting the pin from the UI
@@ -210,9 +210,8 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
                 vc.dataController = dataController
             }
             
+            
         }
-        
-        
     }
     
 }

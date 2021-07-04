@@ -33,34 +33,24 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     //variable to store random number
     var pageNumber = String((arc4random() % 3) + 1)
     
-    //URL image array
-    
-    var URLForImageArray: [URL] = []
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // makes the collection view looks nice with 3 columns
-        let space: CGFloat = 3.0
-        let dimension = (view.frame.size.width - (2*space)) / 3.0
         
-        flowLayout.minimumLineSpacing = space
-        flowLayout.minimumInteritemSpacing = space
-        flowLayout.itemSize = CGSize(width: dimension, height: dimension)
+        makeCollectionViewThreeColumns()
         
-        // Do any additional setup after loading the view.
-        
+        //hide navigation bar
         navigationController?.setNavigationBarHidden(false, animated: true)
-        // do this later to add the hold touch to delete picture
         
+        //getting last location on map
         settingUpOriginalLocation()
+        //getting data from coreData
         settiUpFetchResults()
         
-        
+        //check the content of coreData and response accordingly
         if let count = fetchedResultsController.fetchedObjects?.count {
             if count == 0 {
-                //getting the URLS of the fotos
                 gettingImagesToLoad()
             }
         }
@@ -70,34 +60,20 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-    
+        
         DataModel.photoArray = []
     }
     
-    func handleImageFileResponse(image: Data?, error: Error?) {
+    
+    fileprivate func makeCollectionViewThreeColumns() {
+        // makes the collection view looks nice with 3 columns
+        let space: CGFloat = 3.0
+        let dimension = (view.frame.size.width - (2*space)) / 3.0
         
-        DispatchQueue.main.async { [weak self] in
-            
-            guard let strongSelf = self else { return }
-            
-            let foto = Foto(context: strongSelf.dataController.viewContext)
-            foto.downloadDate = Date()
-            foto.imageToUse = image
-            foto.pin = strongSelf.pin
-            
-            //saving the data
-            
-            do {
-                try strongSelf.dataController.viewContext.save()
-            } catch {
-                strongSelf.showAlert(alertText: "Data could not be save", alertMessage: "Please try again.")
-            }
-            
-        }
-        
+        flowLayout.minimumLineSpacing = space
+        flowLayout.minimumInteritemSpacing = space
+        flowLayout.itemSize = CGSize(width: dimension, height: dimension)
     }
-    
-    
     
     fileprivate func gettingImagesToLoad() {
         
@@ -109,30 +85,20 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
             
             
             guard let strongSelf = self else { return }
-
+            
             if reponse.count != 0 {
                 
                 //saving the data to a object
                 DataModel.photoArray = reponse
                 
-                //loop that go over all the urls to get the images
-                for index in DataModel.photoArray.indices {
-                    
-                    //checking the string can be a url
-                    guard let URLForImage =  URL(string: DataModel.photoArray[index].url_sq) else {
-                        return
-                    }
-                    strongSelf.URLForImageArray.append(URLForImage)
-                    
+                //loop to create objects that will hold the image
+                for photo in DataModel.photoArray {
+                    //cereating a pin with no picture
+                    strongSelf.handleImageFile(urlForImage: photo.url_sq)
                 }
                 
-                    for photo in DataModel.photoArray {
-                        //cereating a pin with no picture
-                        strongSelf.handleImageFile(urlForImage: photo.url_sq)
-                    }
-                    
-                    //make activity animation to false
-                    strongSelf.setLoggion(false)
+                //make activity animation to false
+                strongSelf.setLoggion(false)
                 
             } else {
                 //make activity animation to false
@@ -180,8 +146,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                 self.showAlert(alertText: "No images for this location", alertMessage: "Please select a new location")
                 
             } else {
-                //delete images
                 
+                //1) delete images
                 
                 if let objectToDelete = fetchedResultsController.fetchedObjects {
                     for index in objectToDelete {
@@ -192,6 +158,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                             showAlert(alertText: "Data could not be save", alertMessage: "Please try again.")
                         }
                     }
+                    // 2) load new images
                     
                     gettingImagesToLoad()
                     
@@ -216,7 +183,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         } else {
             activityIndicator.stopAnimating()
             newColletionButton.isEnabled = true
-
+            
         }
         
     }
@@ -286,51 +253,50 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
-    
-        cell.imageView.image = UIImage(systemName: "cloud")
+        
+        cell.imageView.image = UIImage(named: "placeHolder")
         
         let photo = self.fetchedResultsController.object(at: indexPath)
         let photoURLString = photo.url
         let photoURL = URL(string: photoURLString ?? "")
         
-    
+        
         if
-                photo.imageToUse == nil,
-                let photoURL = photoURL
-     
+            photo.imageToUse == nil,
+            let photoURL = photoURL
+        
         {
-                DispatchQueue.global(qos: .background).async { [weak self, photoURL]  in
+            //sending the download on pictures to the a new background trend
+            DispatchQueue.global(qos: .background).async { [weak self, photoURL]  in
+                
+                NetworkRequests.imageRequest(url: photoURL) { (data, error) in
                     
-                    NetworkRequests.imageRequest(url: photoURL) { (data, error) in
+                    DispatchQueue.main.async {
+                        photo.imageToUse = data
                         
-                        DispatchQueue.main.async {
-                            photo.imageToUse = data
-                            
-                            try? self?.dataController.viewContext.save()
-                            
-                            if let data = data {
-                                let uImage = UIImage(data: data)
-                                cell.imageView.image = uImage
-                            }
-                            
+                        try? self?.dataController.viewContext.save()
+                        
+                        if let data = data {
+                            let uImage = UIImage(data: data)
+                            cell.imageView.image = uImage
                         }
-                       
+                        
                     }
+                    
                 }
+            }
         }
         else {
             if let image = photo.imageToUse {
                 let uiImage = UIImage(data: image)
                 cell.imageView?.image = uiImage
+            }
         }
-                    }
-                    
+        
         
         return cell
         
     }
-    
-    
     
     
     
@@ -426,7 +392,7 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate {
             blockOperation.addExecutionBlock { [weak self] in
                 
                 self?.collectionView?.deleteItems(at: [indexPath])
-
+                
                 
             }
             
@@ -442,7 +408,7 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate {
             }
             
         @unknown default: break
-
+            
         }
         
     }
