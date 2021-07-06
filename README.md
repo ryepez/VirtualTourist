@@ -11,8 +11,8 @@ Clone the GitHub repository.
 ## Usage 
 
 ### Welcome Screen
-![Screenshot](startMap.png)
+![Screenshot](startMapN.png)
 
 ### Photos for locations 
-![Screenshot](location.png)
+![Screenshot](locationN.png)
 
