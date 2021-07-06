@@ -11,6 +11,8 @@ Clone the GitHub repository.
 ## Usage 
 
 ### Welcome Screen
-TODO:
-### Example 
-TODO:
+![Screenshot](startMap.png)
+
+### Photos for locations 
+![Screenshot](location.png)
+
