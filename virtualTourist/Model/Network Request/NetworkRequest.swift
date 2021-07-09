@@ -12,6 +12,7 @@ class NetworkRequests {
     
     
     struct Auth {
+        //add your own API key here from flickr 
         static var apiKey = "API goes here"
     }
     
