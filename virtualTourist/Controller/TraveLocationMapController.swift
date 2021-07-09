@@ -195,7 +195,7 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
     
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let vc = segue.destination as? PhotoAlbumViewController {
+        if let viewController = segue.destination as? PhotoAlbumViewController {
             if let pins = fetchedResultsController.fetchedObjects {
                 //selected pin at that moment
                 let annotation = mapView.selectedAnnotations[0]
@@ -206,8 +206,8 @@ class TraveLocationMapController: UIViewController, NSFetchedResultsControllerDe
                 }) else {
                     return
                 }
-                vc.pin = pins[indexPath]
-                vc.dataController = dataController
+                viewController.pin = pins[indexPath]
+                viewController.dataController = dataController
             }
             
             

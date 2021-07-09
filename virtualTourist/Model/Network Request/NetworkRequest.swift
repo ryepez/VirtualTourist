@@ -12,16 +12,13 @@ class NetworkRequests {
     
     
     struct Auth {
-        static var apiKey = "49486a458e82e1d5f7b2b1c95b324cff"
+        static var apiKey = "API goes here"
     }
     
     enum Endpoints {
         static let base = "https://www.flickr.com/services/rest/?method="
         
-        
-        
         case getPictureOneMileRadius(String, String, String)
-    
         
         var stringValue: String {
             switch self {
@@ -46,7 +43,7 @@ class NetworkRequests {
                 }
                 return
             }
-
+            
             let decoder = JSONDecoder()
             do {
                 let responseObject = try decoder.decode(ResponseType.self, from: data)
@@ -91,16 +88,15 @@ class NetworkRequests {
                 completionHandler(nil, error)
                 return
             }
-        
-                let imageData = try! Data(contentsOf: location)
-                  completionHandler(imageData, nil)
-         
-        
+            
+            let imageData = try! Data(contentsOf: location)
+            completionHandler(imageData, nil)
+            
         }
         task.resume()
-    
-    
-}
+        
+        
+    }
     
     
 }
